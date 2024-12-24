@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import { toast } from "react-hot-toast";
 import SyncLoader from "react-spinners/SyncLoader";
-import { UserDataContext } from "../context/UserContext";
+import { UserDataContext } from "../Context/UserContext";
 
 const Login = () => {
   const isLocalhost = window.location.hostname === "localhost";

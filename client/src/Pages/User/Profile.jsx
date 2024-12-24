@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
-import { UserDataContext } from "../../context/UserContext";
+import { UserDataContext } from "../../Context/UserContext";
 
 const UserProfile = () => {
   const { user } = useContext(UserDataContext);

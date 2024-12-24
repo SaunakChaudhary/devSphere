@@ -2,7 +2,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { UserDataContext } from "../../context/UserContext";
+import { UserDataContext } from "../../Context/UserContext";
 import SyncLoader from "react-spinners/SyncLoader";
 
 const InterestSelection = () => {

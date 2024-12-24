@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import "remixicon/fonts/remixicon.css";
-import { UserDataContext } from "../../context/UserContext";
+import { UserDataContext } from "../../Context/UserContext";
 import { useContext, useState } from "react";
 import { useLocation } from "react-router-dom";
 import UserNavbar from "../../Components/UserNavbar";
