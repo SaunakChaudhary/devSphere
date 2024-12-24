@@ -149,7 +149,7 @@ const OTPValidation = ({ formData, setFormData, serverOtp }) => {
           <p className="text-gray-600 font-bold mt-2">
             We&apos;ve sent a 6-digit OTP to your email
           </p>
-          <p className="text-blue-500 font-bold">user@example.com</p>
+          <p className="text-blue-500 font-bold">{formData.email}</p>
         </div>
 
         {/* OTP Input Fields */}

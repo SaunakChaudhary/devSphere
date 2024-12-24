@@ -54,7 +54,7 @@ const InterestSelection = () => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        "http://localhost:5000/hashtag/addIntoUserSchema",
+        `${API_BASE_URL}/hashtag/addIntoUserSchema`,
         {
           method: "POST",
           headers: {
@@ -129,7 +129,7 @@ const InterestSelection = () => {
   const updateRole = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("http://localhost:5000/auth/manual-signup", {
+      const response = await fetch(`${API_BASE_URL}/auth/manual-signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -35,6 +35,17 @@ const AuthForm = () => {
   const sendEmail = async (e) => {
     e.preventDefault();
     try {
+      if(formData.password.length < 8){
+        toast.error("Password must be 8 characters long");
+        return;
+      }
+      
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(formData.password)) {
+        toast.error("Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character");
+        return;
+      }
+      
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/auth/send-otp-mail`, {
         method: "POST",
@@ -46,8 +57,6 @@ const AuthForm = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success(data.message);
-        console.log(data.OTP);
-
         setServerOtp(data.OTP);
         setShowOTPPanel(true);
       } else {
