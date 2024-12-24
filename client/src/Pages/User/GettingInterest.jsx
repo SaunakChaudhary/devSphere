@@ -10,7 +10,7 @@ const InterestSelection = () => {
 
   const API_BASE_URL = isLocalhost
   ? "http://localhost:5000"
-  : "https://devsphere-q2y0.onrender.com";
+  : "https://devsphere-backend-bxxx.onrender.com";
 
   const navigate = useNavigate();
   const { setUser, user } = useContext(UserDataContext);

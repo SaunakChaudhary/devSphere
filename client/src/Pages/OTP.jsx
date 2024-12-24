@@ -10,7 +10,7 @@ const OTPValidation = ({ formData, setFormData, serverOtp }) => {
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
-    : "https://devsphere-q2y0.onrender.com";
+    : "hhttps://devsphere-backend-bxxx.onrender.com";
 
   const { setUser } = useContext(UserDataContext);
   const navigate = useNavigate();
