@@ -2,18 +2,23 @@
 /* eslint-disable react/prop-types */
 
 import { useEffect, useContext } from "react";
-import { UserDataContext } from "../context/UserContext";
+import { UserDataContext } from "../Context/UserContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const UserProtected = ({ children }) => {
+  const isLocalhost = window.location.hostname === "localhost";
+  const API_BASE_URL = isLocalhost
+    ? "http://localhost:5000"
+    : "https://devsphere-q2y0.onrender.com";
+
   const navigate = useNavigate();
   const { setUser } = useContext(UserDataContext);
   const token = localStorage.getItem("token");
 
   const getUserData = async () => {
     try {
-      const response = await fetch("http://localhost:5000/auth/get-user", {
+      const response = await fetch(`${API_BASE_URL}/auth/get-user`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

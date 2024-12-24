@@ -8,10 +8,27 @@ const DB = require("./database/Db");
 const authRouter = require("./routes/auth.routes");
 const hashtagaRouter = require("./routes/hashtag.routes");
 
-const corseOption = {
-  origin: "*",
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "http://localhost:5173", // Development frontend
+      
+    ];
+
+    // Check if the request's origin is in the list of allowed origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true); // Allow the request
+    } else {
+      callback(new Error("Not allowed by CORS")); // Reject the request
+    }
+  },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, // If you're using cookies or sessions
 };
+
+const cors = require("cors");
+app.use(cors(corsOptions));
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

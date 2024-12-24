@@ -7,6 +7,11 @@ import { UserDataContext } from "../Context/UserContext";
 import OTPValidation from "./OTP";
 
 const AuthForm = () => {
+  const isLocalhost = window.location.hostname === "localhost";
+  const API_BASE_URL = isLocalhost
+    ? "http://localhost:5000"
+    : "https://devsphere-q2y0.onrender.com";
+
   const navigate = useNavigate();
   const { setUser } = useContext(UserDataContext);
   const [loading, setLoading] = useState(false);
@@ -31,7 +36,7 @@ const AuthForm = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:5000/auth/send-otp-mail", {
+      const response = await fetch(`${API_BASE_URL}/auth/send-otp-mail`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,9 +47,9 @@ const AuthForm = () => {
       if (response.ok) {
         toast.success(data.message);
         console.log(data.OTP);
-        
+
         setServerOtp(data.OTP);
-        setShowOTPPanel(true)
+        setShowOTPPanel(true);
       } else {
         toast.error(data.message);
       }
@@ -60,7 +65,7 @@ const AuthForm = () => {
       if (authResult["code"]) {
         setLoading(true);
         const response = await fetch(
-          `http://localhost:5000/auth/google-signup?code=${authResult.code}`,
+          `${API_BASE_URL}/auth/google-signup?code=${authResult.code}`,
           {
             method: "GET",
           }
@@ -247,7 +252,11 @@ const AuthForm = () => {
           </div>
         </div>
       ) : (
-        <OTPValidation formData={formData} setFormData={setFormData} serverOtp={serverOtp}/>
+        <OTPValidation
+          formData={formData}
+          setFormData={setFormData}
+          serverOtp={serverOtp}
+        />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { NavLink } from "react-router-dom";
-import { UserDataContext } from "../context/UserContext";
+import { UserDataContext } from "../Context/UserContext";
 
 
 const UserSlidebar = () => {

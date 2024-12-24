@@ -6,6 +6,11 @@ import SyncLoader from "react-spinners/SyncLoader";
 import { UserDataContext } from "../context/UserContext";
 
 const Login = () => {
+  const isLocalhost = window.location.hostname === "localhost";
+  const API_BASE_URL = isLocalhost
+    ? "http://localhost:5000"
+    : "https://devsphere-q2y0.onrender.com";
+
   const navigate = useNavigate();
   const { setUser } = useContext(UserDataContext);
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +29,7 @@ const Login = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:5000/auth/manual-login", {
+      const response = await fetch(`${API_BASE_URL}/auth/manual-login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -57,7 +62,7 @@ const Login = () => {
       setLoading(true);
       if (authResult["code"]) {
         const response = await fetch(
-          `http://localhost:5000/auth/google-login?code=${authResult.code}`,
+          `${API_BASE_URL}/auth/google-login?code=${authResult.code}`,
           {
             method: "GET",
           }
