@@ -26,7 +26,6 @@ const corsOptions = {
   credentials: true, // If you're using cookies or sessions
 };
 
-const cors = require("cors");
 app.use(cors(corsOptions));
 
 
