@@ -43,7 +43,7 @@ const InterestSelection = () => {
       }
     };
     getTagsAndCategory();
-  }, []);
+  }, [API_BASE_URL]);
 
   const handleClick = async () => {
     if (selectedInterests.length < 3) {
