@@ -50,16 +50,19 @@ const OTPValidation = ({ formData, setFormData, serverOtp }) => {
 
   const handleKeyDown = (e, index) => {
     if (e.key === "Backspace") {
-      if (!otp[index] && index > 0) {
-        // Focus previous input on backspace if current is empty
-        inputRefs.current[index - 1].focus();
-      }
       const newOtp = [...otp];
-      newOtp[index] = "";
+      newOtp[index] = ""; // Clear the current input
+  
+      // Only move the focus to the previous input if it's empty
+      if (!newOtp[index] && index > 0) {
+        inputRefs.current[index - 1].focus(); // Focus the previous input field
+      }
+  
       setOtp(newOtp);
-      setError("");
+      setError(""); // Clear the error message if any
     }
   };
+  
 
   const handlePaste = (e) => {
     e.preventDefault();
@@ -88,7 +91,6 @@ const OTPValidation = ({ formData, setFormData, serverOtp }) => {
 
     // Add your verification logic here
     if (OTP !== serverOtp) {
-      alert(serverOtp);
       setError("Invalid OTP");
       return;
     }

@@ -6,6 +6,12 @@ import { UserDataContext } from "../../Context/UserContext";
 import SyncLoader from "react-spinners/SyncLoader";
 
 const InterestSelection = () => {
+  const isLocalhost = window.location.hostname === "localhost";
+
+  const API_BASE_URL = isLocalhost
+  ? "http://localhost:5000"
+  : "https://devsphere-q2y0.onrender.com";
+
   const navigate = useNavigate();
   const { setUser, user } = useContext(UserDataContext);
   const [selectedInterests, setSelectedInterests] = useState([]);
@@ -14,11 +20,12 @@ const InterestSelection = () => {
   const [isNormalUser, setIsNormalUser] = useState(false);
 
   useEffect(() => {
+    
     const getTagsAndCategory = async () => {
       try {
         setIsLoading(true);
         const response = await fetch(
-          "http://localhost:5000/hashtag/get-hashtags",
+          `${API_BASE_URL}/hashtag/get-hashtags`,
           {
             method: "GET",
           }
