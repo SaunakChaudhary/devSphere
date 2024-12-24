@@ -52,7 +52,7 @@ const AboutPage = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div className="order-2 md:order-1">
-                <h3 className="text-xl font-black mb-4">John Developer</h3>
+                <h3 className="text-xl font-black mb-4">Saunak Chaudhary</h3>
                 <p className="font-bold text-gray-700 mb-4">
                   With over a decade of experience in software development and
                   community building, John created devSphere to bridge the gap
@@ -60,7 +60,7 @@ const AboutPage = () => {
                 </p>
                 <div className="flex space-x-4">
                   <NavLink
-                    to="#"
+                    to="https://github.com/SaunakChaudhary"
                     className="bg-gray-100 p-2 border-2 border-black hover:-translate-y-1 transition-transform"
                   >
                     <i className="ri-github-line w-6 h-6"></i>
@@ -72,7 +72,7 @@ const AboutPage = () => {
                     <i className="ri-linkedin-fill w-6 h-6"></i>
                   </NavLink>
                   <NavLink
-                    to="#"
+                    to="mailto:saunakchaudhary0404@gmail.com"
                     className="bg-gray-100 p-2 border-2 border-black hover:-translate-y-1 transition-transform"
                   >
                     <i className="ri-mail-line w-6 h-6"></i>
