@@ -27,7 +27,7 @@ const updatProfile = async (req, res) => {
 
   if (isEmailAlready.username !== username) {
     const isUsernameAlready = await UserModel.findOne({ username });
-    if (!isUsernameAlready) {
+    if (isUsernameAlready) {
       return res.status(400).json({ message: "Username is taken" });
     }
   }
