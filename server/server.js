@@ -12,7 +12,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       "http://localhost:5173", // Development frontend
-      "https://devspheere.netlify.app/"
+      "https://devsphere-1.onrender.com", // Production frontend
     ];
 
     // Check if the request's origin is in the list of allowed origins
@@ -27,7 +27,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
