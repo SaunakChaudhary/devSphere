@@ -7,6 +7,7 @@ const DB = require("./database/Db");
 // Import Routes
 const authRouter = require("./routes/auth.routes");
 const hashtagaRouter = require("./routes/hashtag.routes");
+const userRouter = require("./routes/user.routes");
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -33,6 +34,7 @@ app.use(express.json());
 
 app.use("/auth", authRouter);
 app.use("/hashtag", hashtagaRouter);
+app.use("/user", userRouter);
 
 DB()
   .then(() => {

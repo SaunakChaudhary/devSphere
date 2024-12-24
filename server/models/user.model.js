@@ -2,6 +2,12 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
+    username: {
+      type: String,
+      required: [true, "Username is required"],
+      unique: true,
+      trim: true,
+    },
     name: {
       type: String,
       required: [true, "Name is required"],
@@ -59,11 +65,14 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
-    role:{
-      type:String,
-      enum:['user','organization','admin'],
-      default:'user'
-    }
+    role: {
+      type: String,
+      enum: ["user", "organization", "admin"],
+      default: "user",
+    },
+    portfolioWebsite: {
+      type: String,
+    },
   },
   {
     timestamps: true,

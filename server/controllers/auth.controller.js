@@ -39,6 +39,7 @@ const googleSignup = async (req, res) => {
     const user = await UserModel.create({
       email,
       name,
+      username : email.split('@')[0],
       avatar,
       googleId,
       authProvider,
@@ -152,6 +153,7 @@ const manualSignup = async (req, res) => {
       const hashedPassword = await helper.hashedPassword(password);
       const user = await UserModel.create({
         email,
+        username : email.split('@')[0],
         password: hashedPassword,
         name,
         gitHuburl,

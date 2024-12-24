@@ -244,7 +244,7 @@ const AuthForm = () => {
                 className="w-full bg-gray-100 text-black p-3 border-4 border-black font-bold hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2"
               >
                 <i className="ri-google-fill"></i>
-                Continue with Google
+                Create Account using Google
               </button>
             </div>
 
