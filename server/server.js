@@ -13,7 +13,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       "http://localhost:5173", // Development frontend
-      "https://devsphere-1.onrender.com", // Production frontend
+      "https://devsphere-97jl.onrender.com", // Production frontend
     ];
 
     // Check if the request's origin is in the list of allowed origins
