@@ -39,7 +39,7 @@ const UserNavbar = () => {
               {/* <i className="ri-award-line text-2xl text-[#DAA520]"></i> */}
               <span className="text-2xl">🏆</span>
             </NavLink>
-            <NavLink to="/logout" className="text-black font-bold">
+            <NavLink to="/user/notification" className="text-black font-bold">
               <i className="mr-3 ri-notification-badge-line text-2xl active:text-red-500"></i>
             </NavLink>
             <NavLink to="/logout" className="text-black font-bold">

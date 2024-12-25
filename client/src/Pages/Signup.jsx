@@ -10,7 +10,7 @@ const AuthForm = () => {
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
-    : "https://devsphere-q2y0.onrender.com";
+    : "https://devsphere-backend-bxxx.onrender.com";
 
   const navigate = useNavigate();
   const { setUser } = useContext(UserDataContext);
@@ -18,7 +18,7 @@ const AuthForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showOTPPanel, setShowOTPPanel] = useState(false);
   const [serverOtp, setServerOtp] = useState("");
-
+  const [pswErr, setPswErr] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -35,17 +35,17 @@ const AuthForm = () => {
   const sendEmail = async (e) => {
     e.preventDefault();
     try {
-      if(formData.password.length < 8){
+      if (formData.password.length < 8) {
         toast.error("Password must be 8 characters long");
         return;
       }
-      
+
       const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
       if (!passwordRegex.test(formData.password)) {
-        toast.error("Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character");
+        setPswErr(true);
         return;
       }
-      
+
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/auth/send-otp-mail`, {
         method: "POST",
@@ -59,6 +59,7 @@ const AuthForm = () => {
         toast.success(data.message);
         setServerOtp(data.OTP);
         setShowOTPPanel(true);
+        setPswErr(false)
       } else {
         toast.error(data.message);
       }
@@ -117,7 +118,7 @@ const AuthForm = () => {
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-3xl md:text-4xl font-black mb-2">
-                Join devSphere
+                Join DevSphere
               </h1>
               <p className="font-bold text-gray-700">
                 Create an account to contribute{" "}
@@ -183,6 +184,15 @@ const AuthForm = () => {
                     )}
                   </button>
                 </div>
+                {pswErr && <span className="text-xs font-bold text-red-500">
+                  <ul className="ml-2">
+                    <li>
+                      Password must contain at least 8 characters, one uppercase
+                      letter, one lowercase letter, one number, and one special
+                      character. (@  $  !  %  *  ? &)
+                    </li>
+                  </ul>
+                </span>}
               </div>
               <div>
                 <label className="font-bold mb-1 block">
@@ -265,6 +275,8 @@ const AuthForm = () => {
           formData={formData}
           setFormData={setFormData}
           serverOtp={serverOtp}
+          setShowOTPPanel={setShowOTPPanel}
+          setServerOtp={setServerOtp}
         />
       )}
     </div>

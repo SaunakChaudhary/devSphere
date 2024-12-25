@@ -4,6 +4,7 @@ import UserSlidebar from "../../Components/UserSlidebar";
 import { UserDataContext } from "../../Context/UserContext";
 import { toast } from "react-hot-toast";
 import SyncLoader from "react-spinners/SyncLoader";
+import imageCompression from "browser-image-compression";
 
 const UserProfile = () => {
   const isLocalhost = window.location.hostname === "localhost";
@@ -11,7 +12,8 @@ const UserProfile = () => {
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
 
-  const { user, setUser } = useContext(UserDataContext);
+  const { user, setUser, globalHashtags, setGlobalHashtags } =
+    useContext(UserDataContext);
   const [profileData, setProfileData] = useState({
     name: user?.name || "",
     username: user?.username || "",
@@ -22,10 +24,28 @@ const UserProfile = () => {
     linkedin: user?.linkedin || "",
     portfolioWebsite: user?.portfolioWebsite || "",
     mobileNo: user?.mobileNo || "",
+    interest: user?.interest || [],
   });
 
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentTag, setCurrentTag] = useState("");
+  const [dispSearchTags, setDispSearchTags] = useState([]);
+
+  useEffect(() => {
+    const getAllHashtags = async () => {
+      const response1 = await fetch(`${API_BASE_URL}/hashtag/get-hashtags`, {
+        method: "GET",
+      });
+      const data1 = await response1.json();
+      if (response1.ok) {
+        setGlobalHashtags(data1);
+      } else {
+        toast.error(data1.message);
+      }
+    };
+    getAllHashtags();
+  }, [API_BASE_URL, setGlobalHashtags]);
 
   useEffect(() => {
     setProfileData({
@@ -38,20 +58,51 @@ const UserProfile = () => {
       linkedin: user?.linkedin || "",
       portfolioWebsite: user?.portfolioWebsite || "",
       mobileNo: user?.mobileNo || "",
+      interest: user?.interest || [],
     });
   }, [user]);
 
+  useEffect(() => {
+    const arr = [];
+    if (currentTag) {
+      // Only run the logic if currentTag is not empty
+      globalHashtags?.forEach((hashtag) => {
+        const fetchtag = hashtag.tag;
+        const fetchCounts = hashtag.count;
+        const fetchId = hashtag._id;
+        const regex = new RegExp(currentTag, "i");
+        if (regex.test(fetchtag)) {
+          arr.push({
+            hashtag: fetchtag,
+            count: fetchCounts,
+            id: fetchId,
+          });
+        }
+      });
+    }
+    setDispSearchTags(arr);
+  }, [currentTag, globalHashtags]);
+
   const [previewImage, setPreviewImage] = useState(null);
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     setImage(file);
     if (file) {
+      const options = {
+        maxSizeMB: 0.2, // Max file size in MB
+        maxWidthOrHeight: 800, // Max width/height of the image
+        useWebWorker: true, // Use a Web Worker for compression
+      };
+
+      // Compress the image
+      const compressedFile = await imageCompression(file, options);
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressedFile);
     }
   };
 
@@ -71,10 +122,11 @@ const UserProfile = () => {
         return;
       }
 
-      if(profileData.mobileNo.length !== 10){
+      if (profileData.mobileNo && profileData.mobileNo.length !== 10) {
         toast.error("Mobile no should be of 10 digits");
         return;
       }
+
       setIsLoading(true);
       // Update user profile
       const formData = new FormData();
@@ -87,7 +139,10 @@ const UserProfile = () => {
       formData.append("linkedin", profileData.linkedin);
       formData.append("portfolioWebsite", profileData.portfolioWebsite);
       formData.append("mobileNo", profileData.mobileNo);
-
+      if (user?.avatar) {
+        formData.append("oldAvatar", user.avatar);
+      }
+      formData.append("interest", JSON.stringify(profileData.interest));
       const response = await fetch(`${API_BASE_URL}/user/update-profile`, {
         method: "POST",
         body: formData,
@@ -101,7 +156,40 @@ const UserProfile = () => {
       }
       setIsLoading(false);
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.message);
+    }
+  };
+
+  const removeTag = (index) => {
+    setProfileData((prevState) => {
+      const updatedInterests = prevState.interest.filter((_, i) => i !== index);
+      return { ...prevState, interest: updatedInterests };
+    });
+  };
+
+  const handleAddHashtag = () => {
+    if (currentTag) {
+      const result = globalHashtags.find((item) => item.tag === currentTag);
+      if (
+        result &&
+        !profileData.interest.some((item) => item.tag === result.tag)
+      ) {
+        setProfileData((prevState) => ({
+          ...prevState,
+          interest: [
+            ...prevState.interest,
+            {
+              _id: result._id,
+              tag: result.tag,
+              count: result.count,
+              type: result.type,
+            },
+          ],
+        }));
+        setCurrentTag("");
+      } else {
+        toast.error("Hashtag Already in your list");
+      }
     }
   };
 
@@ -227,6 +315,65 @@ const UserProfile = () => {
                         onChange={handleInputChange}
                         className="w-full p-3 md:p-4 text-base md:text-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all disabled:bg-gray-50"
                       />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-lg md:text-xl font-bold mb-2">
+                      <span className="whitespace-nowrap">Intrests : </span>
+                      <span className="ml-2 font-semibold text-sm">
+                        {" "}
+                        (we&apos;ll give you better result according to your
+                        interests.)
+                      </span>
+                    </label>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="text"
+                        value={currentTag}
+                        onChange={(e) => setCurrentTag(e.target.value)}
+                        className="flex-grow p-3 md:p-4 text-base md:text-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all"
+                        placeholder="Add hashtags (e.g. javascript, webdev)"
+                      />
+                      <div
+                        onClick={handleAddHashtag}
+                        className="cursor-pointer bg-green-500 text-white font-bold py-3 px-6 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-green-700 active:translate-x-1 active:translate-y-1 active:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        Add
+                      </div>
+                    </div>
+                    <div className="mt-5">
+                      {dispSearchTags.slice(0, 5).map((abc, idx) => {
+                        return (
+                          <div
+                            className="w-full bg-blue-200 my-2 p-3 font-bold shadow-[2px_2px_0px_0px] cursor-pointer"
+                            key={idx}
+                            onClick={() => setCurrentTag(abc.hashtag)}
+                          >
+                            {`#${abc.hashtag}  (${abc.count})`}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex gap-2 mb-4 flex-wrap mt-8 max-h-48 overflow-y-auto">
+                      {profileData.interest.map((hashtag, index) => (
+                        <span
+                          key={index}
+                          className={`
+                            ${hashtag.type === "languages" && "bg-green-400"}
+                            ${hashtag.type === "frontend" && "bg-purple-400"}
+                            ${hashtag.type === "backend" && "bg-orange-400"}
+                            ${hashtag.type === "other" && "bg-red-400"}
+                             text-white px-3 md:px-4 py-1 md:py-2 text-sm md:text-base font-bold flex items-center gap-2`}
+                        >
+                          #{hashtag.tag}
+                          <div
+                            onClick={() => removeTag(index)}
+                            className="cursor-pointer hover:text-red-400"
+                          >
+                            <i className="ri-close-line"></i>
+                          </div>
+                        </span>
+                      ))}
                     </div>
                   </div>
 

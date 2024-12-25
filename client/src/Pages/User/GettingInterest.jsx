@@ -9,30 +9,27 @@ const InterestSelection = () => {
   const isLocalhost = window.location.hostname === "localhost";
 
   const API_BASE_URL = isLocalhost
-  ? "http://localhost:5000"
-  : "https://devsphere-backend-bxxx.onrender.com";
+    ? "http://localhost:5000"
+    : "https://devsphere-backend-bxxx.onrender.com";
 
   const navigate = useNavigate();
-  const { setUser, user } = useContext(UserDataContext);
+  const { setUser, user , setGlobalHashtags} = useContext(UserDataContext);
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [hashtags, setHashtags] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isNormalUser, setIsNormalUser] = useState(false);
 
   useEffect(() => {
-    
     const getTagsAndCategory = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(
-          `${API_BASE_URL}/hashtag/get-hashtags`,
-          {
-            method: "GET",
-          }
-        );
+        const response = await fetch(`${API_BASE_URL}/hashtag/get-hashtags`, {
+          method: "GET",
+        });
         const data = await response.json();
         if (response.ok) {
           setHashtags(data);
+          setGlobalHashtags(data)
         } else {
           toast.error(data.message);
         }
@@ -43,7 +40,7 @@ const InterestSelection = () => {
       }
     };
     getTagsAndCategory();
-  }, [API_BASE_URL]);
+  }, [API_BASE_URL, setGlobalHashtags]);
 
   const handleClick = async () => {
     if (selectedInterests.length < 3) {

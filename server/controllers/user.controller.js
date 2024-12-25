@@ -1,4 +1,5 @@
 const UserModel = require("../models/user.model");
+const cloudinary = require("../utils/cloudinary.config");
 
 const updatProfile = async (req, res) => {
   const {
@@ -10,6 +11,8 @@ const updatProfile = async (req, res) => {
     linkedInUrl,
     portfolioWebsite,
     username,
+    oldAvatar,
+    interest,
   } = req.body;
 
   // Validate required fields
@@ -33,6 +36,9 @@ const updatProfile = async (req, res) => {
   }
 
   try {
+    const interestArray = JSON.parse(interest);
+    const allTags = interestArray.map(item=>item._id)
+
     // Construct the update object dynamically
     const updateData = {
       bio: bio || "",
@@ -43,17 +49,35 @@ const updatProfile = async (req, res) => {
       linkedInUrl: linkedInUrl || "",
       portfolioWebsite: portfolioWebsite || "",
       username: username || "",
+      interest: allTags || "",
     };
 
     // Add avatar path if a file is uploaded
     if (req.files?.["avatar"]?.[0]?.path) {
       updateData.avatar = req.files["avatar"][0].path;
+      if (oldAvatar) {
+        const getPublicIdAndExtension = (url) => {
+          const splitUrl = url.split("/");
+          const filename = splitUrl[splitUrl.length - 1];
+          const decodeFilename = decodeURIComponent(filename);
+          const spliDecodeFilename = decodeFilename.split(".");
+          const publicId = spliDecodeFilename[0];
+          const extension = spliDecodeFilename[spliDecodeFilename.length - 1];
+          return { publicId, extension };
+        };
+
+        const { publicId, extension } = getPublicIdAndExtension(oldAvatar);
+        cloudinary.api.delete_resources(
+          [`devsphere_user_profile/${publicId + "." + extension}`],
+          { type: "upload", resource_type: "image" }
+        );
+      }
     }
 
     // Update user profile
     const user = await UserModel.findOneAndUpdate({ email }, updateData, {
       new: true,
-    });
+    }).populate('interest');
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

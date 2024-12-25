@@ -69,9 +69,9 @@ const Login = () => {
         );
         const data = await response.json();
         if (response.ok) {
-          toast.success("Welcome Back " + data.user.name + " 😊");
           localStorage.setItem("token", data.token);
           setUser(data.user);
+          toast.success("Welcome Back " + data.user.name + " 😊");
           navigate("/dashboard");
         } else {
           toast.error(data.message);
@@ -186,7 +186,7 @@ const Login = () => {
 
           {/* Toggle Form Link */}
           <p className="text-center mt-6 font-bold">
-            New to devSphere ?
+            New to DevSphere ?
             <NavLink
               to="/signup"
               className="text-blue-600 hover:underline ml-2"

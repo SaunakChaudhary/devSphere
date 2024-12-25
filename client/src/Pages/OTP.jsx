@@ -6,7 +6,13 @@ import "remixicon/fonts/remixicon.css";
 import { UserDataContext } from "../Context/UserContext";
 import SyncLoader from "react-spinners/SyncLoader";
 
-const OTPValidation = ({ formData, setFormData, serverOtp }) => {
+const OTPValidation = ({
+  formData,
+  setFormData,
+  serverOtp,
+  setShowOTPPanel,
+  setServerOtp,
+}) => {
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
@@ -52,17 +58,16 @@ const OTPValidation = ({ formData, setFormData, serverOtp }) => {
     if (e.key === "Backspace") {
       const newOtp = [...otp];
       newOtp[index] = ""; // Clear the current input
-  
+
       // Only move the focus to the previous input if it's empty
       if (!newOtp[index] && index > 0) {
         inputRefs.current[index - 1].focus(); // Focus the previous input field
       }
-  
+
       setOtp(newOtp);
       setError(""); // Clear the error message if any
     }
   };
-  
 
   const handlePaste = (e) => {
     e.preventDefault();
@@ -126,13 +131,29 @@ const OTPValidation = ({ formData, setFormData, serverOtp }) => {
     }
   };
 
-  const handleResend = () => {
-    setTimeLeft(30);
-    setIsActive(true);
+  const handleResend = async () => {
     setOtp(["", "", "", "", "", ""]);
     setError("");
     inputRefs.current[0].focus();
-    // Add your resend logic here
+    setLoading(true);
+    const response = await fetch(`${API_BASE_URL}/auth/send-otp-mail`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      toast.success(data.message);
+      setServerOtp(data.OTP);
+      setTimeLeft(30);
+      setIsActive(true);
+      setShowOTPPanel(true);
+    } else {
+      toast.error(data.message);
+    }
+    setLoading(false);
   };
 
   return (
@@ -202,7 +223,7 @@ const OTPValidation = ({ formData, setFormData, serverOtp }) => {
 
         {/* Back Button */}
         <button
-          onClick={() => navigate("/signup")}
+          onClick={() => setShowOTPPanel(false)}
           className="w-full mt-4 bg-gray-100 text-gray-700 font-bold py-3 px-4 border-2 border-black hover:bg-gray-200 transition-colors rounded-lg flex items-center justify-center gap-2"
         >
           <i className="ri-arrow-left-line"></i>

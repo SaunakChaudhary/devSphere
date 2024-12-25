@@ -7,7 +7,7 @@ const Components = () => {
     <nav className="flex justify-between items-center mb-8 md:mb-16 bg-white border-4 border-black p-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
       <div className="flex items-center space-x-2 text-2xl">
         <i className="font-bold ri-terminal-window-line"></i>
-        <span className="font-black">devSphere</span>
+        <span className="font-black">DevSphere</span>
       </div>
 
       {/* Mobile Menu Button */}

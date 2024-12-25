@@ -39,7 +39,7 @@ const googleSignup = async (req, res) => {
     const user = await UserModel.create({
       email,
       name,
-      username : email.split('@')[0],
+      username: email.split("@")[0],
       avatar,
       googleId,
       authProvider,
@@ -153,7 +153,7 @@ const manualSignup = async (req, res) => {
       const hashedPassword = await helper.hashedPassword(password);
       const user = await UserModel.create({
         email,
-        username : email.split('@')[0],
+        username: email.split("@")[0],
         password: hashedPassword,
         name,
         gitHuburl,
@@ -172,10 +172,11 @@ const manualSignup = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.user.id);
+    const user = await UserModel.findById(req.user.id).populate('interest');
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
+
     return res.status(200).json({ user });
   } catch (error) {
     return res.status(500).json({ message: "SERVER ERROR : " + error });
@@ -282,7 +283,7 @@ const sendOtpMail = async (req, res) => {
     `;
 
     const response = await sendMail(email, subject, "", html);
-    
+
     if (response.success) {
       return res.status(200).json({ message: response.message, OTP: otp });
     } else {

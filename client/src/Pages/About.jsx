@@ -1,11 +1,15 @@
 import "remixicon/fonts/remixicon.css";
 import { NavLink } from "react-router-dom";
 import Navbar from "../Components/Navbar";
+import { Helmet } from "react-helmet";
 
 const AboutPage = () => {
   return (
     <>
       <div className="min-h-screen bg-yellow-50 p-4 md:p-8">
+        <Helmet>
+          <title>About Us - DevSphere</title>
+        </Helmet>
         {/* Navigation */}
         <Navbar />
         {/* Mission Section */}
@@ -15,7 +19,7 @@ const AboutPage = () => {
               Our Mission
             </h2>
             <p className="text-lg font-bold text-gray-700 mb-6">
-              devSphere is built on the belief that great code comes from
+              DevSphere is built on the belief that great code comes from
               collaboration, continuous learning, and community support.
               We&apos;re creating a space where developers can showcase their
               work, learn from peers, and get recognized for their skills.
@@ -55,7 +59,7 @@ const AboutPage = () => {
                 <h3 className="text-xl font-black mb-4">Saunak Chaudhary</h3>
                 <p className="font-bold text-gray-700 mb-4">
                   With over a decade of experience in software development and
-                  community building, John created devSphere to bridge the gap
+                  community building, John created DevSphere to bridge the gap
                   between talented developers and opportunities.
                 </p>
                 <div className="flex space-x-4">
@@ -66,7 +70,7 @@ const AboutPage = () => {
                     <i className="ri-github-line w-6 h-6"></i>
                   </NavLink>
                   <NavLink
-                    to="#"
+                    to="https://www.linkedin.com/in/saunak-chaudhary-4a4092228/"
                     className="bg-gray-100 p-2 border-2 border-black hover:-translate-y-1 transition-transform"
                   >
                     <i className="ri-linkedin-fill w-6 h-6"></i>
@@ -82,7 +86,7 @@ const AboutPage = () => {
               <div className="order-1 md:order-2">
                 <div className="bg-pink-200 border-4 border-black p-4">
                   <img
-                    src="https://placehold.co/600x400"
+                    src="https://placehold.co/400"
                     alt="Founder"
                     className="w-full border-4 border-black"
                   />
@@ -94,96 +98,67 @@ const AboutPage = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t-4 border-black">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center space-x-2 mb-4">
-                <i className="text-xl font-bold ri-terminal-window-line"></i>
-                <span className="text-2xl font-black">devSphere</span>
+      <footer className="bg-gray-50 border-t-4 border-black">
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          {/* Top Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 items-center">
+            {/* Left: Logo and Description */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <i className="text-2xl font-bold ri-terminal-window-line"></i>
+                <span className="text-2xl font-black">DevSphere</span>
               </div>
-              <p className="font-bold text-gray-700 mb-4">
-                Building the future of developer collaboration, one commit at a
-                time.
+              <p className="text-gray-700 font-medium">
+                Development isn’t just about writing perfect code—it&apos;s
+                about solving real-world problems, creating impactful solutions,
+                and learning from one another. Our mission is to eliminate the
+                barriers that slow down collaboration so developers can focus on
+                what they do best: building the future.
               </p>
-              <div className="flex space-x-4">
-                <NavLink
-                  to="#"
-                  className="hover:-translate-y-1 transition-transform"
+            </div>
+
+            {/* Right: Social Links */}
+            <div className="flex flex-col md:items-end space-y-4 mt-8 md:mt-0">
+              <h3 className="font-bold text-lg">Connect With Us</h3>
+              <div className="flex space-x-6">
+                <a
+                  href="https://github.com/SaunakChaudhary"
+                  className="hover:text-black transition-colors"
+                  aria-label="GitHub"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  <i className="ri-github-fill w-6 h-6"></i>
-                </NavLink>
-                <NavLink
-                  to="#"
-                  className="hover:-translate-y-1 transition-transform"
+                  <i className="ri-github-fill text-2xl"></i>
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/saunak-chaudhary-4a4092228/"
+                  className="hover:text-black transition-colors"
+                  aria-label="LinkedIn"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  <i className="ri-linkedin-fill w-6 h-6"></i>
-                </NavLink>
-                <NavLink
-                  to="#"
-                  className="hover:-translate-y-1 transition-transform"
+                  <i className="ri-linkedin-fill text-2xl"></i>
+                </a>
+                <a
+                  href="mailto:saunakchaudhary0404@gmail.com"
+                  className="hover:text-black transition-colors"
+                  aria-label="Email"
                 >
-                  <i className="ri-mail-line w-6 h-6"></i>
-                </NavLink>
+                  <i className="ri-mail-line text-2xl"></i>
+                </a>
               </div>
-            </div>
-
-            <div>
-              <h3 className="font-black mb-4">Quick Links</h3>
-              <ul className="space-y-2 font-bold">
-                <li>
-                  <NavLink to="#" className="hover:text-blue-600">
-                    Home
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="#" className="hover:text-blue-600">
-                    About
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="#" className="hover:text-blue-600">
-                    Features
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="#" className="hover:text-blue-600">
-                    Community
-                  </NavLink>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-black mb-4">Resources</h3>
-              <ul className="space-y-2 font-bold">
-                <li>
-                  <NavLink to="#" className="hover:text-blue-600">
-                    Documentation
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="#" className="hover:text-blue-600">
-                    Challenges
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="#" className="hover:text-blue-600">
-                    Blog
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="#" className="hover:text-blue-600">
-                    Support
-                  </NavLink>
-                </li>
-              </ul>
             </div>
           </div>
 
-          <div className="border-t-2 border-black mt-8 pt-8 text-center">
-            <p className="font-bold text-gray-700">
-              © {new Date().getFullYear()} devSphere. All rights reserved.
+          {/* Bottom Row */}
+          <div className="border-t-2 border-black mt-8 pt-6 text-center">
+            <p className="text-gray-600">
+              &copy; {new Date().getFullYear()}{" "}
+              <span className="font-bold">DevSphere</span>. All rights reserved.
+            </p>
+            <p>
+              Building the future of developer collaboration, one commit at a
+              time.
             </p>
           </div>
         </div>

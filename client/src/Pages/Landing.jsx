@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import "remixicon/fonts/remixicon.css";
 import Navbar from "../Components/Navbar"
-import { useContext } from "react";
-import { UserDataContext } from "../Context/UserContext";
+import { Helmet } from "react-helmet";
 
 const DevSphereLanding = () => {
-  const {user} = useContext(UserDataContext);
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-yellow-50 p-4 md:p-8">
+       <Helmet>
+          <title>DevSphere</title>
+        </Helmet>
       {/* Navigation */}
       <Navbar />      
 
@@ -25,7 +26,7 @@ const DevSphereLanding = () => {
                 and get recognized for your coding excellence.
               </p>
               <button 
-              onClick={()=>{user ? navigate("/dashboard") : navigate("/signup")}}
+              onClick={()=>{navigate("/signup")}}
               className="w-full md:w-auto bg-pink-400 text-black px-6 md:px-8 py-3 border-4 border-black font-bold hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all">
                 Let&apos;s Begin !
               </button>
@@ -105,7 +106,7 @@ const DevSphereLanding = () => {
             onClick={() => navigate("/signup")}
             className="w-full md:w-auto bg-cyan-300 text-black px-6 md:px-8 py-3 border-4 border-black font-bold hover:translate-y-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all"
           >
-            Join devSphere
+            Join DevSphere
           </button>
         </section>
       </main>
