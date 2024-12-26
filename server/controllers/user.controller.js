@@ -1,5 +1,7 @@
 const UserModel = require("../models/user.model");
+const FollowLikeModel = require("../models/followLike.model");
 const cloudinary = require("../utils/cloudinary.config");
+const followLikeModel = require("../models/followLike.model");
 
 const updatProfile = async (req, res) => {
   const {
@@ -37,7 +39,7 @@ const updatProfile = async (req, res) => {
 
   try {
     const interestArray = JSON.parse(interest);
-    const allTags = interestArray.map(item=>item._id)
+    const allTags = interestArray.map((item) => item._id);
 
     // Construct the update object dynamically
     const updateData = {
@@ -77,7 +79,7 @@ const updatProfile = async (req, res) => {
     // Update user profile
     const user = await UserModel.findOneAndUpdate({ email }, updateData, {
       new: true,
-    }).populate('interest');
+    }).populate("interest");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -91,4 +93,32 @@ const updatProfile = async (req, res) => {
   }
 };
 
-module.exports = { updatProfile };
+const followUnFollow = async (req, res) => {
+  const { loggedInUserId, SearchedUserId } = req.body;
+  try {
+    const followExists = await FollowLikeModel.findOne({
+      userId: loggedInUserId,
+      followedUserId: { $in: SearchedUserId },
+    });
+
+    if (!followExists) {
+      await FollowLikeModel.create({
+        userId: loggedInUserId,
+        followedUserId: [SearchedUserId],
+        isFollowing: true,
+      });
+      return res
+        .status(200)
+        .json({ message: "User followed successfully", success: true });
+    }
+
+    followExists.following = !followExists.following;
+    await followExists.save();
+
+    const action = followExists.following ? "followed" : "unfollowed";
+    return res.status(200).json({ message: `User ${action} successfully` });
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR " + error });
+  }
+};
+module.exports = { updatProfile, followUnFollow };

@@ -1,7 +1,8 @@
+/* eslint-disable react/prop-types */
 
 import { NavLink } from 'react-router-dom'
 
-const UserNavbar = () => {
+const UserNavbar = ({page}) => {
   return (
     <div>
       {/* Navbar */}
@@ -36,7 +37,6 @@ const UserNavbar = () => {
               to="/user/achievements"
               className="text-black font-bold mr-3"
             >
-              {/* <i className="ri-award-line text-2xl text-[#DAA520]"></i> */}
               <span className="text-2xl">🏆</span>
             </NavLink>
             <NavLink to="/user/notification" className="text-black font-bold">
@@ -53,27 +53,27 @@ const UserNavbar = () => {
       <div className="fixed bottom-0 w-full bg-white h-20 flex sm:hidden justify-evenly items-center">
         <div className="p-3">
           <NavLink to="/dashboard">
-            <i className="ri-home-4-line text-3xl"></i>
+            <i className={`ri-home-4-line text-3xl ${page==="home" && 'font-extrabold'}`}></i>
           </NavLink>
         </div>{" "}
         <div className="p-3">
           <NavLink to="/user/search">
-            <i className="ri-search-line text-3xl"></i>
+            <i className={`ri-search-line text-3xl ${page==="Search" && 'font-extrabold'}`}></i>
           </NavLink>
         </div>{" "}
         <div className="p-3">
           <NavLink to="/user/create-post">
-            <i className="ri-add-box-line text-3xl"></i>
+            <i className={`ri-add-box-line text-3xl ${page==="Create" && 'font-extrabold'}`}></i>
           </NavLink>
         </div>{" "}
         <div className="p-3">
           <NavLink to="/user/challenges">
-            <i className="ri-trophy-line text-3xl"></i>
+            <i className={`ri-trophy-line text-3xl  ${page==="Challenges" && 'font-extrabold'}`}></i>
           </NavLink>
         </div>{" "}
         <div className="p-3">
           <NavLink to="/user/profile">
-            <i className="ri-user-3-line text-3xl"></i>
+            <i className={`ri-user-3-line text-3xl ${page==="MyProfile" && 'font-extrabold'}`}></i>
           </NavLink>
         </div>
       </div>

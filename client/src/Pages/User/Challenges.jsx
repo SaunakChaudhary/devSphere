@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 import "remixicon/fonts/remixicon.css";
 
 const Challenges = () => {
+  useEffect(() => {
+      window.scrollTo(0, 0);
+    }, []);
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   
   const challenges = [
@@ -44,7 +47,7 @@ const Challenges = () => {
 
   return (
     <div className="bg-yellow-50 min-h-screen flex flex-col">
-      <UserNavbar />
+      <UserNavbar page="Challenges" />
       <div className="p-4 flex-grow flex flex-col md:flex-row gap-4">
         <div>
           <UserSlidebar />

@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 
 const CreatePost = () => {
+  useEffect(() => {
+      window.scrollTo(0, 0);
+    }, []);
   const navigate = useNavigate();
   const [hashtags, setHashtags] = useState([]);
   const [currentTag, setCurrentTag] = useState("");
@@ -21,7 +24,7 @@ const CreatePost = () => {
 
   return (
     <div className="bg-yellow-50 min-h-screen">
-      <UserNavbar />
+      <UserNavbar  page="Create" />
       
       <div className="p-4 flex flex-col md:flex-row">
         <UserSlidebar />
@@ -33,7 +36,7 @@ const CreatePost = () => {
               {/* Header */}
               <h1 className="text-3xl md:text-4xl font-black mb-6 md:mb-8 flex items-center">
                 <i className="ri-quill-pen-line mr-4 text-2xl md:text-3xl"></i>
-                Create New Post
+                Upload your projects
               </h1>
 
               {/* Title Input */}

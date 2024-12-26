@@ -1,12 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import "remixicon/fonts/remixicon.css";
 import { UserDataContext } from "../../Context/UserContext";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 
 const UserDashboard = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useContext(UserDataContext);
@@ -51,7 +54,7 @@ const UserDashboard = () => {
 
   return (
     <div className="bg-yellow-50 min-h-screen flex flex-col">
-      <UserNavbar />
+      <UserNavbar page="home" />
 
       <div className="p-4 flex-grow flex flex-col md:flex-row">
         <div>

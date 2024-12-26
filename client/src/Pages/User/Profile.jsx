@@ -5,8 +5,13 @@ import { UserDataContext } from "../../Context/UserContext";
 import { toast } from "react-hot-toast";
 import SyncLoader from "react-spinners/SyncLoader";
 import imageCompression from "browser-image-compression";
+import { useNavigate } from "react-router-dom";
 
 const UserProfile = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  const navigate = useNavigate();
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
@@ -20,8 +25,8 @@ const UserProfile = () => {
     email: user?.email || "",
     bio: user?.bio || "",
     avatar: user?.avatar || "",
-    github: user?.github || "",
-    linkedin: user?.linkedin || "",
+    github: user?.gitHuburl || "",
+    linkedin: user?.linkedInUrl || "",
     portfolioWebsite: user?.portfolioWebsite || "",
     mobileNo: user?.mobileNo || "",
     interest: user?.interest || [],
@@ -54,8 +59,8 @@ const UserProfile = () => {
       email: user?.email || "",
       bio: user?.bio || "",
       avatar: user?.avatar || "",
-      github: user?.github || "",
-      linkedin: user?.linkedin || "",
+      gitHuburl: user?.github || "",
+      linkedInUrl: user?.linkedin || "",
       portfolioWebsite: user?.portfolioWebsite || "",
       mobileNo: user?.mobileNo || "",
       interest: user?.interest || [],
@@ -135,8 +140,8 @@ const UserProfile = () => {
       formData.append("email", profileData.email);
       formData.append("bio", profileData.bio);
       formData.append("avatar", image);
-      formData.append("github", profileData.github);
-      formData.append("linkedin", profileData.linkedin);
+      formData.append("gitHuburl", profileData.github);
+      formData.append("linkedInUrl", profileData.linkedin);
       formData.append("portfolioWebsite", profileData.portfolioWebsite);
       formData.append("mobileNo", profileData.mobileNo);
       if (user?.avatar) {
@@ -151,6 +156,7 @@ const UserProfile = () => {
       if (response.ok) {
         toast.success(data.message);
         setUser(data.user);
+        navigate("/user/profile");
       } else {
         toast.error(data.message);
       }

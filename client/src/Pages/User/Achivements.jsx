@@ -1,8 +1,12 @@
+import { useEffect } from "react";
 import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 import "remixicon/fonts/remixicon.css";
 
 const Achievements = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   // Sample achievement data
   const stats = {
     totalPoints: 2750,

@@ -172,12 +172,20 @@ const manualSignup = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.user.id).populate('interest');
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
+    const { id } = req.params;
+    if (id) {
+      const user = await UserModel.findById(id).populate("interest");
+      if (!user) {
+        return res.status(400).json({ message: "User not found" });
+      }
+      return res.status(200).json({ user });
+    } else {
+      const user = await UserModel.findById(req.user.id).populate("interest");
+      if (!user) {
+        return res.status(400).json({ message: "User not found" });
+      }
+      return res.status(200).json({ user });
     }
-
-    return res.status(200).json({ user });
   } catch (error) {
     return res.status(500).json({ message: "SERVER ERROR : " + error });
   }

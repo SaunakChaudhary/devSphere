@@ -15,6 +15,8 @@ import Challenges from "./Pages/User/Challenges";
 import Achivements from "./Pages/User/Achivements";
 import Search from "./Pages/User/Search";
 import PNF from "./Pages/PNF";
+import UserProfile from "./Pages/User/UserProfile";
+import MyProfile from "./Pages/User/MyProfile";
 
 const App = () => {
   return (
@@ -40,8 +42,7 @@ const App = () => {
       />
       <Route path="/logout" element={<Logout />} />
       <Route path="/*" element={<PNF />} />
-      
-      {/* Autho Routes */}
+      {/* Auth Routes */}
       <Route
         path="/organization-signup"
         element={
@@ -50,7 +51,6 @@ const App = () => {
           </UserProtected>
         }
       />
-
       {/* User Routes */}
       <Route
         path="/dashboard"
@@ -77,7 +77,7 @@ const App = () => {
         }
       />
       <Route
-        path="/user/profile"
+        path="/user/edit-profile"
         element={
           <UserProtected>
             <Profile />
@@ -108,6 +108,22 @@ const App = () => {
           </UserProtected>
         }
       />
+      <Route
+        path="/user/user_profile/:id"
+        element={
+          <UserProtected>
+            <UserProfile />
+          </UserProtected>
+        }
+      />
+      <Route
+      path="/user/profile"
+      element={
+        <UserProtected>
+          <MyProfile />
+        </UserProtected>
+      }
+    />
     </Routes>
   );
 };
