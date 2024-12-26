@@ -269,7 +269,7 @@ const UserProfile = () => {
                   {user.linkedInUrl && (
                     <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-linkedin-box-fill text-xl"></i>
-                      <span>{user.linkedin}</span>
+                      <span>{user.linkedInUrl}</span>
                     </div>
                   )}
                   {user.portfolioWebsite && (

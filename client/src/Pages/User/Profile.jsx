@@ -25,8 +25,8 @@ const UserProfile = () => {
     email: user?.email || "",
     bio: user?.bio || "",
     avatar: user?.avatar || "",
-    github: user?.gitHuburl || "",
-    linkedin: user?.linkedInUrl || "",
+    gitHuburl: user?.gitHuburl || "",
+    linkedInUrl: user?.linkedInUrl || "",
     portfolioWebsite: user?.portfolioWebsite || "",
     mobileNo: user?.mobileNo || "",
     interest: user?.interest || [],
@@ -59,8 +59,8 @@ const UserProfile = () => {
       email: user?.email || "",
       bio: user?.bio || "",
       avatar: user?.avatar || "",
-      gitHuburl: user?.github || "",
-      linkedInUrl: user?.linkedin || "",
+      gitHuburl: user?.gitHuburl || "",
+      linkedInUrl: user?.linkedInUrl || "",
       portfolioWebsite: user?.portfolioWebsite || "",
       mobileNo: user?.mobileNo || "",
       interest: user?.interest || [],
@@ -140,8 +140,8 @@ const UserProfile = () => {
       formData.append("email", profileData.email);
       formData.append("bio", profileData.bio);
       formData.append("avatar", image);
-      formData.append("gitHuburl", profileData.github);
-      formData.append("linkedInUrl", profileData.linkedin);
+      formData.append("gitHuburl", profileData.gitHuburl);
+      formData.append("linkedInUrl", profileData.linkedInUrl);
       formData.append("portfolioWebsite", profileData.portfolioWebsite);
       formData.append("mobileNo", profileData.mobileNo);
       if (user?.avatar) {
@@ -392,8 +392,8 @@ const UserProfile = () => {
                         </label>
                         <input
                           type="text"
-                          name="github"
-                          value={profileData.github}
+                          name="gitHuburl"
+                          value={profileData.gitHuburl}
                           onChange={handleInputChange}
                           className="w-full p-3 md:p-4 text-base md:text-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all disabled:bg-gray-50"
                         />
@@ -404,8 +404,8 @@ const UserProfile = () => {
                         </label>
                         <input
                           type="text"
-                          name="linkedin"
-                          value={profileData.linkedin}
+                          name="linkedInUrl"
+                          value={profileData.linkedInUrl}
                           onChange={handleInputChange}
                           className="w-full p-3 md:p-4 text-base md:text-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all disabled:bg-gray-50"
                         />
@@ -417,7 +417,7 @@ const UserProfile = () => {
                         </label>
                         <input
                           type="text"
-                          name="portfolio"
+                          name="portfolioWebsite"
                           value={profileData.portfolioWebsite}
                           onChange={handleInputChange}
                           className="w-full p-3 md:p-4 text-base md:text-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all disabled:bg-gray-50"

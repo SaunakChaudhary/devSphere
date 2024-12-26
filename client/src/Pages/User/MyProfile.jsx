@@ -273,13 +273,13 @@ const MyProfile = () => {
                       <span>{userDetails.mobileNo}</span>
                     </div>
                   )}
-                  {userDetails.gitHuburl && (
+                  {userDetails?.gitHuburl && (
                     <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-github-fill text-xl"></i>
                       <span>{userDetails?.gitHuburl}</span>
                     </div>
                   )}
-                  {userDetails.linkedInUrl && (
+                  {userDetails?.linkedInUrl && (
                     <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-linkedin-box-fill text-xl"></i>
                       <span>{userDetails?.linkedInUrl}</span>
@@ -288,7 +288,7 @@ const MyProfile = () => {
                   {userDetails.portfolioWebsite && (
                     <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] md:col-span-2">
                       <i className="ri-global-line text-xl"></i>
-                      <span>{userDetails.portfolioUrl}</span>
+                      <span>{userDetails.portfolioWebsite}</span>
                     </div>
                   )}
                 </div>
