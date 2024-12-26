@@ -2,23 +2,27 @@ import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 import "remixicon/fonts/remixicon.css";
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { UserDataContext } from "../../Context/UserContext";
+import SyncLoader from "react-spinners/SyncLoader";
 
 const UserProfile = () => {
+  const { user } = useContext(UserDataContext);
   const [showFullBio, setShowFullBio] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
 
   const { id } = useParams();
-  const [user, setUser] = useState([]);
+  const [userDetails, setuserDetails] = useState([]);
 
   useEffect(() => {
     const userDetails = async () => {
       try {
+        setLoading(true);
         const response = await fetch(
           `${API_BASE_URL}/search/searchedUser/${id}`,
           {
@@ -27,8 +31,9 @@ const UserProfile = () => {
         );
         const data = await response.json();
         if (response.ok) {
-          setUser(data.userData);
+          setuserDetails(data.userData);
         }
+        setLoading(false);
       } catch (error) {
         toast.error(error);
       }
@@ -36,32 +41,60 @@ const UserProfile = () => {
     userDetails();
   }, [API_BASE_URL, id]);
 
+  const [followers, setFollowers] = useState("");
+  const [following, setFollowing] = useState("");
+  const [updateState, setUpdateState] = useState("");
+  const [updateState1, setUpdateState1] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      const response = await fetch(`${API_BASE_URL}/user/displayAllCounts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ SearchedUserId: id, user: user._id }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setFollowers(data.countFollowers);
+        setFollowing(data.countFollowing);
+        setUpdateState(data.checkFollowing);
+        setUpdateState1(false);
+      } else {
+        toast.error(data.message);
+      }
+      setLoading(false)
+    };
+
+    if (user._id && id) fetchData();
+  }, [API_BASE_URL, id, user._id, updateState1]);
+
+  const handleFollow = async () => {
+    setLoading(true)
+    const response = await fetch(`${API_BASE_URL}/user/followUnFollow`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ loggedInUserId: user._id, SearchedUserId: id }),
+    });
+    if (response.ok) {
+      setUpdateState1(true);
+    }
+    setLoading(false)
+  };
+
   const userData = {
-    name: "Sarah Wilson",
-    username: "@sarahw",
-    bio: "Frontend Developer | UI/UX Enthusiast | Coffee Lover",
-    email: "sarah.wilson@example.com",
-    location: "San Francisco, CA",
-    phone: "+1 (555) 123-4567",
-    points: 1250,
     level: "Pro Developer",
     memberSince: "Jan 2023",
-    github: "github.com/sarahw",
-    linkedin: "linkedin.com/in/sarahw",
-    website: "sarahwilson.dev",
     stats: {
       followers: 1234,
       following: 567,
       projects: 28,
       contributions: 456,
     },
-    interests: [
-      { tag: "javascript", type: "languages" },
-      { tag: "react", type: "frontend" },
-      { tag: "nodejs", type: "backend" },
-      { tag: "typescript", type: "languages" },
-      { tag: "tailwind", type: "frontend" },
-    ],
     projects: [
       {
         title: "E-Commerce Dashboard",
@@ -93,6 +126,11 @@ const UserProfile = () => {
 
   return (
     <div className="bg-yellow-50 min-h-screen">
+      {loading && (
+        <div className="flex justify-center items-center text-white fixed top-0 w-full h-screen bg-black bg-opacity-45 z-50">
+          <SyncLoader color="skyblue" loading={loading} size={15} />
+        </div>
+      )}
       <UserNavbar />
       {/* Top Info Bar */}
       <div className="bg-gray-900 text-white py-3 shadow-lg">
@@ -139,7 +177,7 @@ const UserProfile = () => {
                   <div className="relative">
                     <div className="w-32 h-32 md:w-40 md:h-40 border-4 border-black overflow-hidden rounded-full">
                       <img
-                        src={user.avatar}
+                        src={userDetails.avatar}
                         alt="Profile"
                         className="w-full h-full object-cover rounded-full"
                       />
@@ -150,23 +188,25 @@ const UserProfile = () => {
                   <div className="flex-1 text-center md:text-left">
                     <h1
                       className={`text-3xl font-black mb-2 ${
-                        user && user.name && user.name.length > 25
+                        userDetails &&
+                        userDetails.name &&
+                        userDetails.name.length > 25
                           ? "md:text-3xl"
                           : "md:text-4xl"
                       }`}
                     >
-                      {user.name}
+                      {userDetails.name}
                     </h1>
                     <p className="text-gray-600 text-lg mb-2 font-semibold">
-                      @{user.username}
+                      @{userDetails.username}
                     </p>
                     <p className="text-gray-700 mb-4 text-sm font-semibold text-start">
                       {!showFullBio &&
-                      user?.bio &&
-                      user?.bio.length > 80
-                        ? `${user?.bio.substring(0, 80)}`
-                        : user?.bio}
-                      {user?.bio?.length > 80 && (
+                      userDetails?.bio &&
+                      userDetails?.bio.length > 80
+                        ? `${userDetails?.bio.substring(0, 80)}`
+                        : userDetails?.bio}
+                      {userDetails?.bio?.length > 80 && (
                         <button
                           onClick={() => setShowFullBio(!showFullBio)}
                           className="text-blue-500 hover:underline text-sm font-semibold ml-1"
@@ -178,8 +218,12 @@ const UserProfile = () => {
 
                     {/* Action Buttons */}
                     <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                      <button className="bg-blue-300 text-black font-bold py-2 px-6 border-2 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-blue-400 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
-                        <i className="ri-user-add-line mr-2"></i>Follow
+                      <button
+                        onClick={handleFollow}
+                        className={`${updateState==="Follow" ? 'bg-blue-300  hover:bg-blue-400' : ''} text-black font-bold py-2 px-6 border-2 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none`}
+                      >
+                        <i className="ri-user-add-line mr-2"></i>
+                        {updateState}
                       </button>
                       <button className="bg-green-300 text-black font-bold py-2 px-6 border-2 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-green-400 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
                         <i className="ri-chat-3-line mr-2"></i>Chat
@@ -192,17 +236,13 @@ const UserProfile = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                   <div className="bg-yellow-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                     <div className="text-center">
-                      <p className="text-2xl font-black">
-                        {userData.stats.followers}
-                      </p>
+                      <p className="text-2xl font-black">{followers}</p>
                       <p className="text-gray-700 font-bold">Followers</p>
                     </div>
                   </div>
                   <div className="bg-blue-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                     <div className="text-center">
-                      <p className="text-2xl font-black">
-                        {userData.stats.following}
-                      </p>
+                      <p className="text-2xl font-black">{following}</p>
                       <p className="text-gray-700 font-bold">Following</p>
                     </div>
                   </div>
@@ -226,9 +266,9 @@ const UserProfile = () => {
                 <div>
                   <h2 className="text-2xl font-bold mb-4">Interests</h2>
                   <div className="flex flex-wrap gap-2">
-                    {user &&
-                      user.interest &&
-                      user.interest.map((interest, index) => (
+                    {userDetails &&
+                      userDetails.interest &&
+                      userDetails.interest.map((interest, index) => (
                         <span
                           key={index}
                           className={`
@@ -252,30 +292,30 @@ const UserProfile = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                     <i className="ri-mail-line text-xl"></i>
-                    <span>{user.email}</span>
+                    <span>{userDetails.email}</span>
                   </div>
-                  {user.mobileNo && (
+                  {userDetails.mobileNo && (
                     <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-phone-line text-xl"></i>
-                      <span>{user.mobileNo}</span>
+                      <span>{userDetails.mobileNo}</span>
                     </div>
                   )}
-                  {user.gitHuburl && (
+                  {userDetails.gitHuburl && (
                     <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-github-fill text-xl"></i>
-                      <span>{user.gitHuburl}</span>
+                      <span>{userDetails.gitHuburl}</span>
                     </div>
                   )}
-                  {user.linkedInUrl && (
+                  {userDetails.linkedInUrl && (
                     <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-linkedin-box-fill text-xl"></i>
-                      <span>{user.linkedInUrl}</span>
+                      <span>{userDetails.linkedInUrl}</span>
                     </div>
                   )}
-                  {user.portfolioWebsite && (
+                  {userDetails.portfolioWebsite && (
                     <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] md:col-span-2">
                       <i className="ri-global-line text-xl"></i>
-                      <span>{user.portfolioWebsite}</span>
+                      <span>{userDetails.portfolioWebsite}</span>
                     </div>
                   )}
                 </div>

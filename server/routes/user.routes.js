@@ -16,4 +16,6 @@ router
   .route("/update-profile")
   .post(conditionalUpload, userController.updatProfile);
 
+router.route("/displayAllCounts").post(userController.displayAllCounts);
+router.route("/followUnFollow").post(userController.followUnFollow);
 module.exports = router;

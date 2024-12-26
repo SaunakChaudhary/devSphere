@@ -117,7 +117,7 @@ const Search = () => {
             </form>
 
             {/* Popular Tags */}
-            <div className="mb-6">
+            {searchDataa.length === 0 && <div className="mb-6">
               <h3 className="font-bold text-lg mb-3">Popular Tags:</h3>
               <div className="flex gap-3 flex-wrap">
                 {popularTags.map((tag) => (
@@ -135,7 +135,7 @@ const Search = () => {
                   </button>
                 ))}
               </div>
-            </div>
+            </div>}
 
             {/* Search Results */}
             <div className="max-h-60 overflow-y-auto">

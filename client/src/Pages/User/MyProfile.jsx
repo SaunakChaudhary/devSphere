@@ -13,6 +13,10 @@ const MyProfile = () => {
   }, []);
   const navigate = useNavigate();
   const [showFullBio, setShowFullBio] = useState(false);
+
+  const [followers, setFollowers] = useState("");
+  const [following, setFollowing] = useState("");
+
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
@@ -42,6 +46,28 @@ const MyProfile = () => {
       userDetail();
     }
   }, [API_BASE_URL, user?._id, user]);
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      const response = await fetch(`${API_BASE_URL}/user/displayAllCounts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({user: user._id }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setFollowers(data.countFollowers);
+        setFollowing(data.countFollowing);
+      } else {
+        toast.error(data.message);
+      }
+      setIsLoading(false);
+    };
+
+    if (user._id) fetchData();
+  }, [API_BASE_URL, user._id]);
 
   const userData = {
     name: "Sarah Wilson",
@@ -180,14 +206,14 @@ const MyProfile = () => {
                       userDetails?.bio.length > 80
                         ? `${userDetails?.bio.substring(0, 80)}`
                         : userDetails?.bio}
-                    {userDetails?.bio?.length > 80 && (
-                      <button
-                        onClick={() => setShowFullBio(!showFullBio)}
-                        className="text-blue-500 hover:underline text-sm font-semibold ml-1"
-                      >
-                        {showFullBio ? " Show Less" : " Show More"}
-                      </button>
-                    )}
+                      {userDetails?.bio?.length > 80 && (
+                        <button
+                          onClick={() => setShowFullBio(!showFullBio)}
+                          className="text-blue-500 hover:underline text-sm font-semibold ml-1"
+                        >
+                          {showFullBio ? " Show Less" : " Show More"}
+                        </button>
+                      )}
                     </p>
                     {/* Action Buttons */}
                     <div className="flex flex-wrap gap-4 justify-center md:justify-start">
@@ -206,7 +232,7 @@ const MyProfile = () => {
                   <div className="bg-yellow-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                     <div className="text-center">
                       <p className="text-2xl font-black">
-                        {userData.stats.followers}
+                        {followers}
                       </p>
                       <p className="text-gray-700 font-bold">Followers</p>
                     </div>
@@ -214,7 +240,7 @@ const MyProfile = () => {
                   <div className="bg-blue-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                     <div className="text-center">
                       <p className="text-2xl font-black">
-                        {userData.stats.following}
+                        {following}
                       </p>
                       <p className="text-gray-700 font-bold">Following</p>
                     </div>
