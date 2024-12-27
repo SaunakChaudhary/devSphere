@@ -1,11 +1,18 @@
 /* eslint-disable react/prop-types */
 
-import { useContext, useEffect } from "react";
-import { SocketContext } from "./../Context/SocketContext";
+import { useContext, useEffect, useState } from "react";
+import { SocketContext } from "../Context/SocketContext";
 import { toast } from "react-hot-toast";
 import { NavLink } from "react-router-dom";
+import { UserDataContext } from "../Context/UserContext";
 
 const UserNavbar = ({ page }) => {
+  const isLocalhost = window.location.hostname === "localhost";
+  const [loading, setLoading] = useState(false);
+  const API_BASE_URL = isLocalhost
+    ? "http://localhost:5000"
+    : "https://devsphere-backend-bxxx.onrender.com";
+  const { user } = useContext(UserDataContext);
   const { socket } = useContext(SocketContext);
 
   useEffect(() => {
@@ -43,7 +50,6 @@ const UserNavbar = ({ page }) => {
             </div>
           </div>
         ));
-        // toast(msg.user.name + " " + msg.message);
       });
 
       return () => {
@@ -51,6 +57,31 @@ const UserNavbar = ({ page }) => {
       };
     }
   }, [socket]);
+
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const countNotiFunc = async () => {
+      setLoading(true);
+      const response = await fetch(
+        `${API_BASE_URL}/notification/notificationCount/${user._id}`,
+        {
+          method: "GET",
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setCount(data.count);
+      }
+      setLoading(true);
+    };
+    if(user._id) countNotiFunc();
+    if (user._id && socket) {
+      socket.on("newMessage", (msg) => {
+        countNotiFunc();
+      });
+    }
+
+  }, [API_BASE_URL, socket, user._id]);
 
   return (
     <div>
@@ -61,7 +92,7 @@ const UserNavbar = ({ page }) => {
             <i className="mr-2 ri-terminal-window-line text-3xl"></i>
             <span>DevSphere</span>
           </h1>
-          <div className="hidden md:flex gap-6">
+          <div className="hidden md:flex gap-6 items-center">
             <NavLink
               to="/dashboard"
               className="text-black font-bold hover:underline hover:text-blue-700"
@@ -70,9 +101,12 @@ const UserNavbar = ({ page }) => {
             </NavLink>
             <NavLink
               to="/user/notification"
-              className="text-black font-bold hover:underline hover:text-blue-700"
+              className="text-black font-bold hover:underline hover:text-blue-700 flex items-center"
             >
-              Notifications
+              Notifications{" "}
+              {count > 0 &&<div className="text-white relative bottom-2 rounded-full w-4 text-sm h-4 bg-red-500 z-50 flex justify-center items-center">
+                {count}
+              </div>}
             </NavLink>
             <NavLink
               to="/logout"
@@ -89,7 +123,11 @@ const UserNavbar = ({ page }) => {
               <span className="text-2xl">🏆</span>
             </NavLink>
             <NavLink to="/user/notification" className="text-black font-bold">
-              <i className="mr-3 ri-notification-badge-line text-2xl active:text-red-500"></i>
+              {count === 0 ? (
+                <i className="mr-3 ri-notification-badge-line text-2xl active:text-red-500"></i>
+              ) : (
+                <i className="mr-3 ri-notification-badge-fill text-2xl active:text-red-700 text-red-500"></i>
+              )}
             </NavLink>
             <NavLink to="/logout" className="text-black font-bold">
               <i className="ri-logout-box-r-line text-2xl active:text-red-500"></i>

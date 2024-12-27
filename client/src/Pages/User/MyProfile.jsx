@@ -78,7 +78,7 @@ const MyProfile = () => {
           fetchData();
         })
       }
-  }, [API_BASE_URL, user._id]);
+  }, [API_BASE_URL, socket, user._id]);
 
   const userData = {
     name: "Sarah Wilson",

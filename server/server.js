@@ -9,6 +9,7 @@ const authRouter = require("./routes/auth.routes");
 const hashtagaRouter = require("./routes/hashtag.routes");
 const userRouter = require("./routes/user.routes");
 const searchRouter = require("./routes/search.routes");
+const NotificationRouter = require("./routes/notification.routes");
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -37,6 +38,7 @@ app.use("/auth", authRouter);
 app.use("/hashtag", hashtagaRouter);
 app.use("/user", userRouter);
 app.use("/search", searchRouter);
+app.use("/notification", NotificationRouter);
 
 DB()
   .then(() => {

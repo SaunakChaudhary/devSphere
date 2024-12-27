@@ -2,9 +2,8 @@ const UserModel = require("../models/user.model");
 const cloudinary = require("../utils/cloudinary.config");
 const followLikeModel = require("../models/followLike.model");
 const mongoose = require("mongoose");
-const NotificationModel = require("../models/handleNotification.model")
-const { getReceiverSocketId , io} = require("../Socket/socket");
-
+const NotificationModel = require("../models/handleNotification.model");
+const { getReceiverSocketId, io } = require("../Socket/socket");
 
 const updatProfile = async (req, res) => {
   const {
@@ -126,7 +125,8 @@ const followUnFollow = async (req, res) => {
     ]);
 
     // Check if the logged-in user is already following the searched user
-    const isFollowing = loggedInUserDoc.following.includes(searchedUserObjectId);
+    const isFollowing =
+      loggedInUserDoc.following.includes(searchedUserObjectId);
 
     // Update both `following` and `followers` arrays concurrently
     const [updateLoggedInUser, updateSearchedUser] = await Promise.all([
@@ -143,16 +143,27 @@ const followUnFollow = async (req, res) => {
           ? { $pull: { followers: loggedInUserObjectId } }
           : { $addToSet: { followers: loggedInUserObjectId } },
         { new: true }
-      ),      
+      ),
     ]);
 
     const receiverSocketId = getReceiverSocketId(searchedUserObjectId);
     if (receiverSocketId && !isFollowing) {
-      const loggedinUserDetails = await UserModel.findById(loggedInUserObjectId)
-      const noti = {type:"info",message:"is Started Following You",user:loggedinUserDetails}
+      const loggedinUserDetails = await UserModel.findById(
+        loggedInUserObjectId
+      );
+      const noti = {
+        type: "info",
+        message: "is Started Following You",
+        user: loggedinUserDetails,
+      };
+      await NotificationModel.create({
+        sender: loggedInUserObjectId,
+        recipient: searchedUserObjectId,
+        content: " is Started Following You",
+        type: "message",
+      });
       io.to(receiverSocketId).emit("newMessage", noti);
-    }
-    else{
+    } else {
       io.to(receiverSocketId).emit("unFollowUpdate", true);
     }
 
@@ -220,7 +231,7 @@ const displayAllCounts = async (req, res) => {
 
 const getFollowersFollowing = async (req, res) => {
   try {
-    const {id} = req.body;
+    const { id } = req.body;
     const user = await UserModel.findById(id);
     if (!user) {
       return res.status(400).json({ message: "User Not Available" });
