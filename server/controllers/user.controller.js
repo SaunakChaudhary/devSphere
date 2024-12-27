@@ -149,9 +149,11 @@ const followUnFollow = async (req, res) => {
     const receiverSocketId = getReceiverSocketId(searchedUserObjectId);
     if (receiverSocketId && !isFollowing) {
       const loggedinUserDetails = await UserModel.findById(loggedInUserObjectId)
-      console.log("Emitting to:", receiverSocketId, "Message:", "Hii");
       const noti = {type:"info",message:"is Started Following You",user:loggedinUserDetails}
       io.to(receiverSocketId).emit("newMessage", noti);
+    }
+    else{
+      io.to(receiverSocketId).emit("unFollowUpdate", true);
     }
 
     return res.status(200).json({

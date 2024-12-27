@@ -6,8 +6,10 @@ import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import SyncLoader from "react-spinners/SyncLoader";
+import { SocketContext } from "../../Context/SocketContext";
 
 const MyProfile = () => {
+  const { socket } = useContext(SocketContext);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -67,6 +69,15 @@ const MyProfile = () => {
     };
 
     if (user._id) fetchData();
+    if (socket && user._id) 
+      {
+        socket.on("newMessage", () => {
+          fetchData();
+        });
+        socket.on("unFollowUpdate",()=>{
+          fetchData();
+        })
+      }
   }, [API_BASE_URL, user._id]);
 
   const userData = {

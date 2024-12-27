@@ -6,10 +6,12 @@ import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { UserDataContext } from "../../Context/UserContext";
 import SyncLoader from "react-spinners/SyncLoader";
+import { SocketContext } from "../../Context/SocketContext";
 
 const UserProfile = () => {
   const navigate = useNavigate();
   const { user } = useContext(UserDataContext);
+  const { socket } = useContext(SocketContext);
   const [showFullBio, setShowFullBio] = useState(false);
   const [loading, setLoading] = useState(false);
   const isLocalhost = window.location.hostname === "localhost";
@@ -70,7 +72,16 @@ const UserProfile = () => {
     };
 
     if (user._id && id) fetchData();
-  }, [API_BASE_URL, id, user._id, updateState1]);
+    if (socket && user._id && id) 
+    {
+      socket.on("newMessage", () => {
+        fetchData();
+      });
+      socket.on("unFollowUpdate",()=>{
+        fetchData();
+      })
+    }
+  }, [API_BASE_URL, id, user._id, updateState1,socket]);
 
   const handleFollow = async () => {
     setLoading(true);
@@ -83,10 +94,9 @@ const UserProfile = () => {
     });
     if (response.ok) {
       setUpdateState1(true);
-    }
-    else{
+    } else {
       const data = await response.json();
-      toast.error(data.message)
+      toast.error(data.message);
     }
     setLoading(false);
   };
@@ -256,7 +266,9 @@ const UserProfile = () => {
                   </div>
                   <div
                     onClick={() =>
-                      navigate(`/user/dispfollowList?follow=Followings&id=${id}`)
+                      navigate(
+                        `/user/dispfollowList?follow=Followings&id=${id}`
+                      )
                     }
                     className="cursor-pointer bg-blue-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
                   >
