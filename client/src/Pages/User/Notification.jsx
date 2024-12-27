@@ -6,6 +6,7 @@ import { UserDataContext } from "../../Context/UserContext";
 import { SocketContext } from "../../Context/SocketContext";
 import { toast } from "react-hot-toast";
 import SyncLoader from "react-spinners/SyncLoader";
+import { NavLink } from "react-router-dom";
 
 const Notifications = () => {
   const isLocalhost = window.location.hostname === "localhost";
@@ -48,15 +49,13 @@ const Notifications = () => {
     if (user?._id) {
       fetchData();
     }
-    if (socket && user._id) 
-      {
-        socket.on("newMessage", () => {
-          fetchData();
-        });
-      }
-  }, [API_BASE_URL, user?._id,socket]);
+    if (socket && user._id) {
+      socket.on("newMessage", () => {
+        fetchData();
+      });
+    }
+  }, [API_BASE_URL, user?._id, socket]);
 
-  
   return (
     <div className="bg-yellow-50 min-h-screen flex flex-col">
       {loading && (
@@ -76,29 +75,61 @@ const Notifications = () => {
           </h1>
           {notifications.length > 0 ? (
             notifications
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) 
-            .map((notification, idx) => (
-              <div
-                key={idx}
-                className={`border-l-4 p-4 mb-4 bg-white
-                } shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]`}
-              >
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-3 items-center">
-                  <div className="mx-3 mr-6">
-                    <img src={notification.sender.avatar} alt="" className="rounded-full w-16" />
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              .map((notification, idx) => (
+                <div
+                  key={idx}
+                  className="border-l-4 p-4 mb-4 bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    {/* Avatar and Notification Content */}
+                    <div className="flex sm:flex-row items-start sm:items-center gap-3 w-full">
+                      {/* Avatar */}
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0">
+                        <img
+                          src={notification.sender.avatar}
+                          alt="User Avatar"
+                          className="rounded-full object-cover border border-gray-300 shadow-sm w-full h-full"
+                        />
+                      </div>
+
+                      {/* Notification Content */}
+                      <div className="flex-grow">
+                        <p className="font-normal text-sm sm:text-base">
+                          <NavLink
+                            to={`/user/user_profile/${notification.sender._id}`}
+                            className="font-bold"
+                          >
+                            {notification.sender.name}
+                          </NavLink>{" "}
+                          {notification.content}
+                        </p>
+                        {/* Timestamp for Mobile */}
+                        <span className="text-xs text-gray-500 block sm:hidden mt-1 text-left">
+                          {new Date(notification.createdAt).toLocaleString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Timestamp for Larger Screens */}
+                    <span className="text-xs sm:text-base text-gray-600 hidden sm:block whitespace-nowrap">
+                      {new Date(notification.createdAt).toLocaleString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
                   </div>
-                  <p className="font-normal"><b>{notification.sender.name}</b>{notification.content}</p>
-                  </div>
-                  <span className="text-base text-gray-600">
-                    {new Date(notification.createdAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
                 </div>
-              </div>
-            ))
+              ))
           ) : (
             <p className="text-center text-gray-600">No notifications found</p>
           )}
