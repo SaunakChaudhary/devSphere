@@ -84,6 +84,10 @@ const UserProfile = () => {
     if (response.ok) {
       setUpdateState1(true);
     }
+    else{
+      const data = await response.json();
+      toast.error(data.message)
+    }
     setLoading(false);
   };
 

@@ -18,6 +18,7 @@ import PNF from "./Pages/PNF";
 import UserProfile from "./Pages/User/UserProfile";
 import DispFollowUsers from "./Pages/User/DispFollowUsers";
 import MyProfile from "./Pages/User/MyProfile";
+import Notifications from "./Pages/User/Notification";
 
 const App = () => {
   return (
@@ -126,13 +127,21 @@ const App = () => {
         }
       />
       <Route
-      path="/user/profile"
-      element={
-        <UserProtected>
-          <MyProfile />
-        </UserProtected>
-      }
-    />
+        path="/user/profile"
+        element={
+          <UserProtected>
+            <MyProfile />
+          </UserProtected>
+        }
+      />
+      <Route
+        path="/user/notification"
+        element={
+          <UserProtected>
+            <Notifications />
+          </UserProtected>
+        }
+      />
     </Routes>
   );
 };

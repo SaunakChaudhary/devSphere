@@ -1,8 +1,8 @@
 require("dotenv").config();
 const express = require("express");
-const app = express();
 const cors = require("cors");
 const DB = require("./database/Db");
+const { server, app } = require("./Socket/socket");
 
 // Import Routes
 const authRouter = require("./routes/auth.routes");
@@ -40,7 +40,7 @@ app.use("/search", searchRouter);
 
 DB()
   .then(() => {
-    app.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
       console.log(`Listening to the PORT ${process.env.PORT}`);
     });
   })

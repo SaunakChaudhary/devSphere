@@ -2,6 +2,9 @@ const UserModel = require("../models/user.model");
 const cloudinary = require("../utils/cloudinary.config");
 const followLikeModel = require("../models/followLike.model");
 const mongoose = require("mongoose");
+const NotificationModel = require("../models/handleNotification.model")
+const { getReceiverSocketId , io} = require("../Socket/socket");
+
 
 const updatProfile = async (req, res) => {
   const {
@@ -123,8 +126,7 @@ const followUnFollow = async (req, res) => {
     ]);
 
     // Check if the logged-in user is already following the searched user
-    const isFollowing =
-      loggedInUserDoc.following.includes(searchedUserObjectId);
+    const isFollowing = loggedInUserDoc.following.includes(searchedUserObjectId);
 
     // Update both `following` and `followers` arrays concurrently
     const [updateLoggedInUser, updateSearchedUser] = await Promise.all([
@@ -141,8 +143,16 @@ const followUnFollow = async (req, res) => {
           ? { $pull: { followers: loggedInUserObjectId } }
           : { $addToSet: { followers: loggedInUserObjectId } },
         { new: true }
-      ),
+      ),      
     ]);
+
+    const receiverSocketId = getReceiverSocketId(searchedUserObjectId);
+    if (receiverSocketId && !isFollowing) {
+      const loggedinUserDetails = await UserModel.findById(loggedInUserObjectId)
+      console.log("Emitting to:", receiverSocketId, "Message:", "Hii");
+      const noti = {type:"info",message:"is Started Following You",user:loggedinUserDetails}
+      io.to(receiverSocketId).emit("newMessage", noti);
+    }
 
     return res.status(200).json({
       message: isFollowing

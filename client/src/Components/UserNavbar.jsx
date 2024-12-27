@@ -1,8 +1,57 @@
 /* eslint-disable react/prop-types */
 
-import { NavLink } from 'react-router-dom'
+import { useContext, useEffect } from "react";
+import { SocketContext } from "./../Context/SocketContext";
+import { toast } from "react-hot-toast";
+import { NavLink } from "react-router-dom";
 
-const UserNavbar = ({page}) => {
+const UserNavbar = ({ page }) => {
+  const { socket } = useContext(SocketContext);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("newMessage", (msg) => {
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+          >
+            <div className="flex-1 w-0 p-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 pt-0.5">
+                  <img
+                    className="h-10 w-10 rounded-full"
+                    src={msg.user.avatar}
+                    alt=""
+                  />
+                </div>
+                <div className="ml-3 flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    {msg.user.name + " " + msg.message}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex border-l border-gray-200">
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        ));
+        // toast(msg.user.name + " " + msg.message);
+      });
+
+      return () => {
+        socket.off("newMessage"); // Clean up listener on unmount
+      };
+    }
+  }, [socket]);
+
   return (
     <div>
       {/* Navbar */}
@@ -53,32 +102,52 @@ const UserNavbar = ({page}) => {
       <div className="fixed bottom-0 w-full bg-white h-20 flex sm:hidden justify-evenly items-center">
         <div className="p-3">
           <NavLink to="/dashboard">
-            <i className={`ri-home-4-line text-3xl ${page==="home" && 'font-extrabold'}`}></i>
+            <i
+              className={`ri-home-4-line text-3xl ${
+                page === "home" && "font-extrabold"
+              }`}
+            ></i>
           </NavLink>
         </div>{" "}
         <div className="p-3">
           <NavLink to="/user/search">
-            <i className={`ri-search-line text-3xl ${page==="Search" && 'font-extrabold'}`}></i>
+            <i
+              className={`ri-search-line text-3xl ${
+                page === "Search" && "font-extrabold"
+              }`}
+            ></i>
           </NavLink>
         </div>{" "}
         <div className="p-3">
           <NavLink to="/user/create-post">
-            <i className={`ri-add-box-line text-3xl ${page==="Create" && 'font-extrabold'}`}></i>
+            <i
+              className={`ri-add-box-line text-3xl ${
+                page === "Create" && "font-extrabold"
+              }`}
+            ></i>
           </NavLink>
         </div>{" "}
         <div className="p-3">
           <NavLink to="/user/challenges">
-            <i className={`ri-trophy-line text-3xl  ${page==="Challenges" && 'font-extrabold'}`}></i>
+            <i
+              className={`ri-trophy-line text-3xl  ${
+                page === "Challenges" && "font-extrabold"
+              }`}
+            ></i>
           </NavLink>
         </div>{" "}
         <div className="p-3">
           <NavLink to="/user/profile">
-            <i className={`ri-user-3-line text-3xl ${page==="MyProfile" && 'font-extrabold'}`}></i>
+            <i
+              className={`ri-user-3-line text-3xl ${
+                page === "MyProfile" && "font-extrabold"
+              }`}
+            ></i>
           </NavLink>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default UserNavbar
+export default UserNavbar;
