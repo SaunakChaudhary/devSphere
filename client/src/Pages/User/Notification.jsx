@@ -86,7 +86,7 @@ const Notifications = () => {
                 <div className="flex justify-between items-center">
                   <div className="flex gap-3 items-center">
                   <div className="mx-3 mr-6">
-                    <img src={notification.recipient.avatar} alt="" className="rounded-full w-16" />
+                    <img src={notification.sender.avatar} alt="" className="rounded-full w-16" />
                   </div>
                   <p className="font-normal"><b>{notification.sender.name}</b>{notification.content}</p>
                   </div>
