@@ -8,7 +8,6 @@ import { UserDataContext } from "../Context/UserContext";
 
 const UserNavbar = ({ page }) => {
   const isLocalhost = window.location.hostname === "localhost";
-  const [loading, setLoading] = useState(false);
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
@@ -61,7 +60,6 @@ const UserNavbar = ({ page }) => {
   const [count, setCount] = useState(0);
   useEffect(() => {
     const countNotiFunc = async () => {
-      setLoading(true);
       const response = await fetch(
         `${API_BASE_URL}/notification/notificationCount/${user._id}`,
         {
@@ -72,11 +70,10 @@ const UserNavbar = ({ page }) => {
       if (response.ok) {
         setCount(data.count);
       }
-      setLoading(true);
     };
     if(user._id) countNotiFunc();
     if (user._id && socket) {
-      socket.on("newMessage", (msg) => {
+      socket.on("newMessage", () => {
         countNotiFunc();
       });
     }
