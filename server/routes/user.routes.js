@@ -18,4 +18,5 @@ router
 
 router.route("/displayAllCounts").post(userController.displayAllCounts);
 router.route("/followUnFollow").post(userController.followUnFollow);
+router.route("/getFollowersFollowing").post(userController.getFollowersFollowing);
 module.exports = router;

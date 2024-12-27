@@ -1,13 +1,14 @@
 import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 import "remixicon/fonts/remixicon.css";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { UserDataContext } from "../../Context/UserContext";
 import SyncLoader from "react-spinners/SyncLoader";
 
 const UserProfile = () => {
+  const navigate = useNavigate();
   const { user } = useContext(UserDataContext);
   const [showFullBio, setShowFullBio] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,7 @@ const UserProfile = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
+      setLoading(true);
       const response = await fetch(`${API_BASE_URL}/user/displayAllCounts`, {
         method: "POST",
         headers: {
@@ -65,14 +66,14 @@ const UserProfile = () => {
       } else {
         toast.error(data.message);
       }
-      setLoading(false)
+      setLoading(false);
     };
 
     if (user._id && id) fetchData();
   }, [API_BASE_URL, id, user._id, updateState1]);
 
   const handleFollow = async () => {
-    setLoading(true)
+    setLoading(true);
     const response = await fetch(`${API_BASE_URL}/user/followUnFollow`, {
       method: "POST",
       headers: {
@@ -83,7 +84,7 @@ const UserProfile = () => {
     if (response.ok) {
       setUpdateState1(true);
     }
-    setLoading(false)
+    setLoading(false);
   };
 
   const userData = {
@@ -220,7 +221,11 @@ const UserProfile = () => {
                     <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                       <button
                         onClick={handleFollow}
-                        className={`${updateState==="Follow" ? 'bg-blue-300  hover:bg-blue-400' : ''} text-black font-bold py-2 px-6 border-2 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none`}
+                        className={`${
+                          updateState === "Follow"
+                            ? "bg-blue-300  hover:bg-blue-400"
+                            : ""
+                        } text-black font-bold py-2 px-6 border-2 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none`}
                       >
                         <i className="ri-user-add-line mr-2"></i>
                         {updateState}
@@ -234,13 +239,23 @@ const UserProfile = () => {
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                  <div className="bg-yellow-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                  <div
+                    className="cursor-pointer bg-yellow-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                    onClick={() =>
+                      navigate(`/user/dispfollowList?follow=Followers&id=${id}`)
+                    }
+                  >
                     <div className="text-center">
                       <p className="text-2xl font-black">{followers}</p>
                       <p className="text-gray-700 font-bold">Followers</p>
                     </div>
                   </div>
-                  <div className="bg-blue-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                  <div
+                    onClick={() =>
+                      navigate(`/user/dispfollowList?follow=Followings&id=${id}`)
+                    }
+                    className="cursor-pointer bg-blue-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                  >
                     <div className="text-center">
                       <p className="text-2xl font-black">{following}</p>
                       <p className="text-gray-700 font-bold">Following</p>
@@ -290,30 +305,30 @@ const UserProfile = () => {
               <div className="bg-white border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 md:p-8 mb-6">
                 <h2 className="text-2xl font-bold mb-4">Contact Information</h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="w-full overflow-y-auto flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                     <i className="ri-mail-line text-xl"></i>
                     <span>{userDetails.email}</span>
                   </div>
                   {userDetails.mobileNo && (
-                    <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="w-full overflow-y-auto flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-phone-line text-xl"></i>
                       <span>{userDetails.mobileNo}</span>
                     </div>
                   )}
                   {userDetails.gitHuburl && (
-                    <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="w-full overflow-y-auto flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-github-fill text-xl"></i>
                       <span>{userDetails.gitHuburl}</span>
                     </div>
                   )}
                   {userDetails.linkedInUrl && (
-                    <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="w-full overflow-y-auto flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-linkedin-box-fill text-xl"></i>
                       <span>{userDetails.linkedInUrl}</span>
                     </div>
                   )}
                   {userDetails.portfolioWebsite && (
-                    <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] md:col-span-2">
+                    <div className="w-full overflow-y-auto flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] md:col-span-2">
                       <i className="ri-global-line text-xl"></i>
                       <span>{userDetails.portfolioWebsite}</span>
                     </div>

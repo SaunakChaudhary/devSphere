@@ -54,7 +54,7 @@ const MyProfile = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({user: user._id }),
+        body: JSON.stringify({ user: user._id }),
       });
       const data = await response.json();
       if (response.ok) {
@@ -229,19 +229,29 @@ const MyProfile = () => {
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                  <div className="bg-yellow-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                  <div
+                    onClick={() =>
+                      navigate(
+                        `/user/dispfollowList?follow=Followers&id=${userDetails?._id}`
+                      )
+                    }
+                    className="cursor-pointer bg-yellow-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                  >
                     <div className="text-center">
-                      <p className="text-2xl font-black">
-                        {followers}
-                      </p>
+                      <p className="text-2xl font-black">{followers}</p>
                       <p className="text-gray-700 font-bold">Followers</p>
                     </div>
                   </div>
-                  <div className="bg-blue-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                  <div
+                    onClick={() =>
+                      navigate(
+                        `/user/dispfollowList?follow=Followings&id=${userDetails?._id}`
+                      )
+                    }
+                    className="cursor-pointer bg-blue-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                  >
                     <div className="text-center">
-                      <p className="text-2xl font-black">
-                        {following}
-                      </p>
+                      <p className="text-2xl font-black">{following}</p>
                       <p className="text-gray-700 font-bold">Following</p>
                     </div>
                   </div>
@@ -289,30 +299,30 @@ const MyProfile = () => {
               <div className="bg-white border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 md:p-8 mb-6">
                 <h2 className="text-2xl font-bold mb-4">Contact Information</h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="w-full overflow-hidden flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                     <i className="ri-mail-line text-xl"></i>
                     <span>{userDetails?.email}</span>
                   </div>
                   {userDetails?.mobileNo && (
-                    <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="w-full overflow-x-auto  flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-phone-line text-xl"></i>
                       <span>{userDetails.mobileNo}</span>
                     </div>
                   )}
                   {userDetails?.gitHuburl && (
-                    <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="w-full overflow-x-auto  flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-github-fill text-xl"></i>
                       <span>{userDetails?.gitHuburl}</span>
                     </div>
                   )}
                   {userDetails?.linkedInUrl && (
-                    <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="w-full overflow-x-auto flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                       <i className="ri-linkedin-box-fill text-xl"></i>
                       <span>{userDetails?.linkedInUrl}</span>
                     </div>
                   )}
                   {userDetails.portfolioWebsite && (
-                    <div className="flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] md:col-span-2">
+                    <div className="w-full overflow-x-auto flex items-center gap-3 p-4 bg-gray-100 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] md:col-span-2">
                       <i className="ri-global-line text-xl"></i>
                       <span>{userDetails.portfolioWebsite}</span>
                     </div>

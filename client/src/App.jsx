@@ -16,6 +16,7 @@ import Achivements from "./Pages/User/Achivements";
 import Search from "./Pages/User/Search";
 import PNF from "./Pages/PNF";
 import UserProfile from "./Pages/User/UserProfile";
+import DispFollowUsers from "./Pages/User/DispFollowUsers";
 import MyProfile from "./Pages/User/MyProfile";
 
 const App = () => {
@@ -105,6 +106,14 @@ const App = () => {
         element={
           <UserProtected>
             <Search />
+          </UserProtected>
+        }
+      />
+      <Route
+        path="/user/dispfollowList"
+        element={
+          <UserProtected>
+            <DispFollowUsers />
           </UserProtected>
         }
       />

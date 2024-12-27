@@ -95,78 +95,62 @@ const updatProfile = async (req, res) => {
 
 const followUnFollow = async (req, res) => {
   const { loggedInUserId, SearchedUserId } = req.body;
+
   try {
-    const findUser = await followLikeModel.findOne({ user: loggedInUserId });
-    // Validate SearchedUserId and loggedInUserId
+    // Validate user IDs
     if (
       !mongoose.Types.ObjectId.isValid(loggedInUserId) ||
       !mongoose.Types.ObjectId.isValid(SearchedUserId)
     ) {
       return res.status(400).json({ message: "Invalid user IDs" });
     }
+
+    const loggedInUserObjectId = new mongoose.Types.ObjectId(loggedInUserId);
     const searchedUserObjectId = new mongoose.Types.ObjectId(SearchedUserId);
 
-    if (findUser) {
-      const isFollowing = findUser.following.includes(searchedUserObjectId);
+    // Fetch or create documents for both users concurrently
+    const [loggedInUserDoc, searchedUserDoc] = await Promise.all([
+      followLikeModel.findOneAndUpdate(
+        { user: loggedInUserObjectId },
+        { $setOnInsert: { user: loggedInUserObjectId, following: [] } },
+        { new: true, upsert: true }
+      ),
+      followLikeModel.findOneAndUpdate(
+        { user: searchedUserObjectId },
+        { $setOnInsert: { user: searchedUserObjectId, followers: [] } },
+        { new: true, upsert: true }
+      ),
+    ]);
 
-      // Update the user's following array
-      const updatedUser = await followLikeModel.findOneAndUpdate(
-        { user: loggedInUserId },
+    // Check if the logged-in user is already following the searched user
+    const isFollowing =
+      loggedInUserDoc.following.includes(searchedUserObjectId);
+
+    // Update both `following` and `followers` arrays concurrently
+    const [updateLoggedInUser, updateSearchedUser] = await Promise.all([
+      followLikeModel.findOneAndUpdate(
+        { user: loggedInUserObjectId },
         isFollowing
           ? { $pull: { following: searchedUserObjectId } }
           : { $addToSet: { following: searchedUserObjectId } },
         { new: true }
-      );
-
-      const findFollowedUser = await followLikeModel.findOne({
-        user: searchedUserObjectId,
-      });
-
-      if (findFollowedUser) {
-        const isFollower = findFollowedUser.followers.includes(loggedInUserId);
-        const updateFollower = await followLikeModel.findOneAndUpdate(
-          { user: searchedUserObjectId },
-          isFollower
-            ? { $pull: { followers: loggedInUserId } }
-            : { $addToSet: { followers: loggedInUserId } },
-          { new: true }
-        );
-        return res.status(200).json({ updatedUser, updateFollower });
-      } else {
-        const createUser = await followLikeModel.create({
-          user: searchedUserObjectId,
-          followers: [loggedInUserId],
-        });
-        return res.status(200).json({ updatedUser, createUser });
-      }
-    }
-
-    const createUser = await followLikeModel.create({
-      user: loggedInUserId,
-      following: [searchedUserObjectId],
-    });
-
-    const findFollowedUser = await followLikeModel.findOne({
-      user: searchedUserObjectId,
-    });
-
-    if (findFollowedUser) {
-      const isFollower = findFollowedUser.followers.includes(loggedInUserId);
-      const updateFollower = await followLikeModel.findOneAndUpdate(
+      ),
+      followLikeModel.findOneAndUpdate(
         { user: searchedUserObjectId },
-        isFollower
-          ? { $pull: { followers: loggedInUserId } }
-          : { $addToSet: { followers: loggedInUserId } },
+        isFollowing
+          ? { $pull: { followers: loggedInUserObjectId } }
+          : { $addToSet: { followers: loggedInUserObjectId } },
         { new: true }
-      );
-      return res.status(200).json({ createUser, updateFollower });
-    } else {
-      const createFollowedUser = await followLikeModel.create({
-        user: searchedUserObjectId,
-        followers: [loggedInUserId],
-      });
-      return res.status(200).json({ createUser, createFollowedUser });
-    }
+      ),
+    ]);
+
+    return res.status(200).json({
+      message: isFollowing
+        ? "Unfollowed successfully"
+        : "Followed successfully",
+      updateLoggedInUser,
+      updateSearchedUser,
+    });
   } catch (error) {
     return res.status(500).json({ message: "SERVER ERROR " + error });
   }
@@ -222,4 +206,33 @@ const displayAllCounts = async (req, res) => {
   }
 };
 
-module.exports = { updatProfile, followUnFollow, displayAllCounts };
+const getFollowersFollowing = async (req, res) => {
+  try {
+    const {id} = req.body;
+    const user = await UserModel.findById(id);
+    if (!user) {
+      return res.status(400).json({ message: "User Not Available" });
+    }
+
+    const userId = await followLikeModel
+      .findOne({ user: id })
+      .populate("following")
+      .populate("followers");
+
+    if (userId) {
+      return res
+        .status(200)
+        .json({ following: userId.following, followers: userId.followers });
+    }
+    return res.status(200).json({ following: [], followers: [] });
+  } catch (error) {
+    return res.status(500).json({ message: "SEERVER ERROR " + error });
+  }
+};
+
+module.exports = {
+  updatProfile,
+  followUnFollow,
+  displayAllCounts,
+  getFollowersFollowing,
+};
