@@ -179,7 +179,7 @@ const ProjectSubmission = () => {
 
       <div className="flex flex-col md:flex-row p-4">
         <UserSlidebar />
-        <div className="mx-auto bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 md:p-10 w-full max-w-4xl">
+        <div className="mb-20 mx-auto bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 md:p-10 w-full max-w-4xl">
           {/* Header */}
           <h1 className="text-3xl md:text-4xl font-black mb-8 flex items-center gap-4">
             <span>
