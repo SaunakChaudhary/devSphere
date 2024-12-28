@@ -37,7 +37,7 @@ const addProject = async (req, res) => {
       if (receiverSocketId) {
         const notification = {
           type: "info",
-          message: "is Mentioned you in their Story",
+          message: "is Mentioned you in their Project",
           user: taggedUser,
         };
         // Emit notification via socket
@@ -47,7 +47,7 @@ const addProject = async (req, res) => {
       await NotificationModel.create({
         sender: userId,
         recipient: taggedUser._id,
-        content: "is Mentioned you in their Story",
+        content: "is Mentioned you in their Project",
         type: "message",
       });
     }
