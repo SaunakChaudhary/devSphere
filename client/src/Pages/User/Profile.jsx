@@ -19,6 +19,7 @@ const UserProfile = () => {
 
   const { user, setUser, globalHashtags, setGlobalHashtags } =
     useContext(UserDataContext);
+
   const [profileData, setProfileData] = useState({
     name: user?.name || "",
     username: user?.username || "",
@@ -323,6 +324,7 @@ const UserProfile = () => {
                       />
                     </div>
                   </div>
+                  
                   <div>
                     <label className="text-lg md:text-xl font-bold mb-2">
                       <span className="whitespace-nowrap">Intrests : </span>

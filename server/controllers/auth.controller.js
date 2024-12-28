@@ -170,6 +170,18 @@ const manualSignup = async (req, res) => {
   }
 };
 
+const getAllUser = async (req, res) => {
+  try {
+    const user = await UserModel.find();
+    if (!user) {
+      return res.status(400).json({ message: "Users not found" });
+    }
+    return res.status(200).json({ user });
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR : " + error });
+  }
+};
+
 const getUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -309,4 +321,5 @@ module.exports = {
   manualSignup,
   getUser,
   sendOtpMail,
+  getAllUser
 };
