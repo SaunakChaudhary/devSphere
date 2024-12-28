@@ -83,10 +83,10 @@ const AboutPage = () => {
                   </NavLink>
                 </div>
               </div>
-              <div className="order-1 md:order-2">
+              <div className="border-1 md:border-2">
                 <div className="bg-pink-200 border-4 border-black p-4">
                   <img
-                    src="https://placehold.co/400"
+                    src="./founder.JPG"
                     alt="Founder"
                     className="w-full border-4 border-black"
                   />
@@ -109,7 +109,7 @@ const AboutPage = () => {
                 <span className="text-2xl font-black">DevSphere</span>
               </div>
               <p className="text-gray-700 font-medium">
-                Development isn’t just about writing perfect code—it&apos;s
+                Development isn&apos;t just about writing perfect code—it&apos;s
                 about solving real-world problems, creating impactful solutions,
                 and learning from one another. Our mission is to eliminate the
                 barriers that slow down collaboration so developers can focus on
