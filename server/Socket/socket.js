@@ -34,8 +34,6 @@ const getReceiverSocketId = (receiverId) => {
 
 // Handle socket connection
 io.on("connection", (socket) => {
-  console.log("Socket connected:", socket.id);
-
   const userId = socket.handshake.query.userId;
 
   if (userId) {
@@ -48,8 +46,6 @@ io.on("connection", (socket) => {
 
   // Handle disconnection
   socket.on("disconnect", () => {
-    console.log("Socket disconnected:", socket.id);
-
     if (userId && userSocketMap[userId]) {
       // Remove the disconnected socket ID
       userSocketMap[userId] = userSocketMap[userId].filter(

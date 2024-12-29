@@ -4,6 +4,8 @@ import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 import { UserDataContext } from "../../Context/UserContext";
 import toast from "react-hot-toast";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const ProjectSubmission = () => {
   const { user } = useContext(UserDataContext);
@@ -72,6 +74,7 @@ const ProjectSubmission = () => {
   const [formData, setFormData] = useState({
     title: "",
     githubRepo: "",
+    description: "",
     demoUrl: "",
   });
 
@@ -103,16 +106,52 @@ const ProjectSubmission = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const descData = formData.description || ""; // Ensure description is defined
+      descData.includes("")
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(descData, "text/html");
+      const anchorTags = doc.querySelectorAll("a");
+      const anchorContents = Array.from(anchorTags).map(
+        (anchor) => anchor.textContent
+      );
+
+      // Ensure users and username are properly handled
+      const filteredTags = anchorContents
+        .filter((tag) => {
+          if (tag.charAt(0) === "@") {
+            const username = tag.split("@")[1]; // Extract username
+            return users.some((user) => user.username === username); // Ensure users.username exists
+          }
+          return false;
+        })
+        .map((tag) => tag.split("@")[1]);
+      const notFilteredTags = anchorContents.filter((tag) => {
+        if (tag.charAt(0) === "@") {
+          const username = tag.split("@")[1]; // Extract username
+          return !users.some((user) => user.username === username); // Ensure users.username exists
+        }
+        return false;
+      });
+
+      if (notFilteredTags.length > 0) {
+        toast.error(
+          `${notFilteredTags.join(", ")} ${
+            notFilteredTags.length > 1 ? "are" : "is"
+          } not available.`
+        );
+        return; // Prevent form submission if there are invalid tags
+      }
+
       const sendData = {
         title: formData.title,
         githubRepo: formData.githubRepo,
         demoUrl: formData.demoUrl,
-        technologies,
-        description: text,
-        tagedUsers: arr,
-        userId: user?._id,
+        technologies, // Assuming technologies is defined
+        description: formData.description.replace("_blank","_self"),
+        userId: user?._id, // Safely access user._id
+        tagedUsers: filteredTags,
       };
-      console.log(sendData)
+
       const response = await fetch(`${API_BASE_URL}/project/addProject`, {
         method: "POST",
         headers: {
@@ -120,57 +159,28 @@ const ProjectSubmission = () => {
         },
         body: JSON.stringify(sendData),
       });
+
       const data = await response.json();
       if (response.ok) {
         toast.success(data.message);
+        setTechnologies([]);
+        setFormData({
+          title: "",
+          githubRepo: "",
+          description: "",
+          demoUrl: "",
+        });
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error);
+      console.error("Error in handleSubmit:", error); // Log error for debugging
+      toast.error("An error occurred while submitting the form.");
     }
   };
 
-  // Description
-  const [text, setText] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [currentInput, setCurrentInput] = useState("");
-  const [cursorPos, setCursorPos] = useState(0);
-
-  const showSuggestions = (input) => {
-    const filteredUsers = users.filter((user) =>
-      user.username.startsWith(input)
-    );
-    setSuggestions(filteredUsers);
-  };
-
-  const [arr, setArr] = useState([]);
-
-  const insertUser = (username) => {
-    const newText = text.slice(0, text.lastIndexOf("@")) + "@" + username + " ";
-
-    setArr((prev) => [...prev, username]);
-
-    setText(newText);
-    setSuggestions([]);
-    setCursorPos(newText.length);
-  };
-
-  const handleChange = (e) => {
-    const newText = e.target.value;
-    const cursorPosition = e.target.selectionStart;
-
-    setText(newText);
-    setCursorPos(cursorPosition);
-
-    const atPosition = newText.lastIndexOf("@", cursorPosition);
-    if (atPosition !== -1 && cursorPosition > atPosition) {
-      const substring = newText.slice(atPosition + 1, cursorPosition);
-      setCurrentInput(substring);
-      showSuggestions(substring);
-    } else {
-      setSuggestions([]);
-    }
+  const handleDescriptionChange = (value) => {
+    setFormData({ ...formData, description: value });
   };
 
   return (
@@ -206,7 +216,8 @@ const ProjectSubmission = () => {
             {/* Technologies Used */}
             <div className="mb-6">
               <label className="block text-xl font-bold mb-2">
-                <span className="whitespace-nowrap">Technologies Used : </span>
+                <span className="whitespace-nowrap">Technologies Used</span>
+                <span className="text-red-500">*</span> :
               </label>
               <div className="flex flex-col sm:flex-row gap-2">
                 <input
@@ -263,77 +274,20 @@ const ProjectSubmission = () => {
             {/* Project Description */}
             <div className="mb-6">
               <label className="text-xl font-bold mb-2 block">
-                Project Description <span className="text-red-500">*</span> :
+                Project Description
+                <span className="text-red-500">*</span> :
                 <span className="font-normal text-xs ml-2">
                   (You can mention your partner by typing &apos;@&apos; followed
-                  by their name, and selecting the appropriate suggestion from
+                  by their username, and select the text and click on link icon.
                   the list.)
                 </span>
               </label>
-              <textarea
-                name="description"
-                value={text}
-                onChange={handleChange}
+              <ReactQuill
+                value={formData.description}
+                onChange={handleDescriptionChange}
                 className="w-full p-4 text-lg border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all min-h-[200px] rounded-lg"
                 placeholder="Tell us about your project..."
               />
-              <div style={{ position: "relative" }}>
-                {suggestions.length > 0 && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "100%",
-                      left: "0",
-                      border: "1px solid #ccc",
-                      backgroundColor: "white",
-                      width: "100%",
-                      maxHeight: "200px",
-                      overflowY: "auto",
-                      borderRadius: "8px", // Rounded corners for a modern look
-                      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Slight shadow for depth
-                      zIndex: 1000, // Ensure it appears on top
-                    }}
-                  >
-                    {suggestions.map((user, index) => (
-                      <div
-                        key={index}
-                        className="suggestion"
-                        style={{
-                          padding: "10px",
-                          cursor: "pointer",
-                          backgroundColor: "#f9f9f9",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px", // Space between image and text
-                          borderBottom: "1px solid #ddd", // Divider between suggestions
-                          transition: "background-color 0.3s ease", // Smooth hover effect
-                        }}
-                        onClick={() => insertUser(user.username)}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = "#e5e5e5"; // Hover effect
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = "#f9f9f9"; // Reset hover effect
-                        }}
-                      >
-                        <img
-                          src={user.avatar || "/default-avatar.png"} // Default image if no avatar
-                          alt={user.username}
-                          style={{
-                            width: "40px",
-                            height: "40px",
-                            borderRadius: "50%", // Circular avatar
-                            objectFit: "cover", // Crop image to fit
-                          }}
-                        />
-                        <span style={{ fontWeight: "bold", color: "#333" }}>
-                          {user.username}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* GitHub Repo */}

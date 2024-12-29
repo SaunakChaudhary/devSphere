@@ -19,6 +19,7 @@ import UserProfile from "./Pages/User/UserProfile";
 import DispFollowUsers from "./Pages/User/DispFollowUsers";
 import MyProfile from "./Pages/User/MyProfile";
 import Notifications from "./Pages/User/Notification";
+import Redirect from "./Pages/User/Redirect";
 
 const App = () => {
   return (
@@ -142,6 +143,7 @@ const App = () => {
           </UserProtected>
         }
       />
+      <Route path="/user/:id" element={<Redirect />} />{" "}
     </Routes>
   );
 };

@@ -1,5 +1,6 @@
 const UserModel = require("../models/user.model");
 const HashtagModel = require("../models/hashtag.model");
+const { default: mongoose } = require("mongoose");
 
 const getSearchResults = async (req, res) => {
   const { search } = req.query;
@@ -20,10 +21,15 @@ const getSearchResults = async (req, res) => {
 const searchedUser = async (req, res) => {
   const { id } = req.params;
   try {
-    if (!id) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid user IDs" });
+    }
+    const idd = new mongoose.Types.ObjectId(id);
+
+    if (!idd) {
       return res.status(400).json({ message: "User id required" });
     }
-    const userData = await UserModel.findById(id).populate("interest");
+    const userData = await UserModel.findById(idd).populate("interest");
     if (userData) {
       return res.status(200).json({ userData });
     }
@@ -33,4 +39,21 @@ const searchedUser = async (req, res) => {
   }
 };
 
-module.exports = { getSearchResults , searchedUser};
+
+const redirectUser = async (req, res) => {
+  const { username } = req.params;
+  try {
+    if (!username) {
+      return res.status(400).json({ message: "Username required" });
+    }
+    const userData = await UserModel.findOne({username});
+    if (userData) {
+      return res.status(200).json({ userData });
+    }
+    return res.status(400).json({ message: "User Not available" });
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR : " + error });
+  }
+};
+
+module.exports = { getSearchResults, searchedUser ,redirectUser };

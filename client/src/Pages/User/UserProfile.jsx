@@ -1,7 +1,7 @@
 import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 import "remixicon/fonts/remixicon.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { UserDataContext } from "../../Context/UserContext";
@@ -20,10 +20,11 @@ const UserProfile = () => {
     : "https://devsphere-backend-bxxx.onrender.com";
 
   const { id } = useParams();
+  console.log(id);
   const [userDetails, setuserDetails] = useState([]);
 
   useEffect(() => {
-    const userDetails = async () => {
+    const fetchUserDetails = async () => {
       try {
         setLoading(true);
         const response = await fetch(
@@ -38,11 +39,17 @@ const UserProfile = () => {
         }
         setLoading(false);
       } catch (error) {
-        toast.error(error);
+        console.log(error);
+        setLoading(false);
       }
     };
-    userDetails();
-  }, [API_BASE_URL, id]);
+
+    if (id.indexOf("@") !== -1) {
+      navigate(`/user/:${id}`);
+    } else {
+      fetchUserDetails();
+    }
+  }, [API_BASE_URL, id, navigate]);
 
   const [followers, setFollowers] = useState("");
   const [following, setFollowing] = useState("");
@@ -72,16 +79,15 @@ const UserProfile = () => {
     };
 
     if (user._id && id) fetchData();
-    if (socket && user._id && id) 
-    {
+    if (socket && user._id && id) {
       socket.on("newMessage", () => {
         fetchData();
       });
-      socket.on("unFollowUpdate",()=>{
+      socket.on("unFollowUpdate", () => {
         fetchData();
-      })
+      });
     }
-  }, [API_BASE_URL, id, user._id, updateState1,socket]);
+  }, [API_BASE_URL, id, user._id, updateState1, socket]);
 
   const handleFollow = async () => {
     setLoading(true);
@@ -138,6 +144,32 @@ const UserProfile = () => {
       },
     ],
   };
+
+  const [projects, setProjects] = useState([]);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/project/fetchProjects`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setProjects(data.projects);
+        setCount(data.count)
+      } else {
+        toast.error(data.message);
+      }
+      setLoading(false);
+    };
+    if (id) fetchProjects();
+  }, [API_BASE_URL, id]);
+
 
   return (
     <div className="bg-yellow-50 min-h-screen">
@@ -280,7 +312,7 @@ const UserProfile = () => {
                   <div className="bg-green-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                     <div className="text-center">
                       <p className="text-2xl font-black">
-                        {userData.stats.projects}
+                        {count}
                       </p>
                       <p className="text-gray-700 font-bold">Projects</p>
                     </div>
@@ -356,46 +388,54 @@ const UserProfile = () => {
               <div className="bg-white border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 md:p-8 mb-20">
                 <h2 className="text-2xl font-bold mb-4">Projects</h2>
                 <div className="grid md:grid-cols-2 gap-6">
-                  {userData.projects.map((project, index) => (
-                    <div
-                      key={index}
-                      className="bg-white border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
-                    >
-                      <img
-                        src={project.image}
-                        alt={project.title}
-                        className="w-full h-48 object-cover border-b-4 border-black"
-                      />
-                      <div className="p-4">
-                        <h3 className="text-xl font-bold mb-2">
-                          {project.title}
-                        </h3>
-                        <p className="text-gray-600 mb-3">
-                          {project.description}
-                        </p>
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {project.tech.map((tech, techIndex) => (
-                            <span
-                              key={techIndex}
-                              className="bg-gray-100 px-2 py-1 text-sm font-bold border-2 border-black"
-                            >
-                              {tech}
-                            </span>
-                          ))}
+                  {projects.length === 0
+                    ? "No Project Uploaded"
+                    : projects.map((project, index) => (
+                        <div
+                          key={index}
+                          className="bg-white border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
+                        >
+                          <div className="p-4">
+                            <h3 className="text-xl font-bold mb-2">
+                              {project.title}
+                            </h3>
+                            <p
+                              className="mb-3 text-gray-600 project-description"
+                              dangerouslySetInnerHTML={{
+                                __html:
+                                  project.description.length > 500
+                                    ? project.description
+                                        ?.substring(0, 500)
+                                        .replace(/<(?!.*<)/, "")
+                                    : project.description,
+                              }}
+                            ></p>
+                            <NavLink to="/" className="block mb-4 text-blue-500 font-semibold">
+                              Read more ...
+                            </NavLink>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {project.technologies.map((tech, techIndex) => (
+                                <span
+                                  key={techIndex}
+                                  className="bg-gray-100 px-2 py-1 text-sm font-bold border-2 border-black"
+                                >
+                                  #{tech.tag}
+                                </span>
+                              ))}
+                            </div>
+                            <div className="flex items-center gap-4 text-gray-600">
+                              <span className="flex items-center gap-1">
+                                <i className="ri-heart-line"></i>
+                                {/* {project.likes} */}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <i className="ri-chat-1-line"></i>
+                                {/* {project.comments} */}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-4 text-gray-600">
-                          <span className="flex items-center gap-1">
-                            <i className="ri-heart-line"></i>
-                            {project.likes}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <i className="ri-chat-1-line"></i>
-                            {project.comments}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      ))}
                 </div>
               </div>
             </div>

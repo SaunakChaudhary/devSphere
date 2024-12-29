@@ -69,4 +69,20 @@ const addProject = async (req, res) => {
   }
 };
 
-module.exports = { addProject };
+const fetchProjects = async (req, res) =>  {
+  const { id } = req.body;
+  try {
+    const projects = await projectModel.find({ userId: id }).populate("technologies");
+    const count = await projectModel.countDocuments({ userId: id });
+    if (!projects) {
+      return res.status(200).json({ projects:[] , count:0});
+    }
+    return res.status(200).json({ projects , count});
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR " + error });
+  }
+};
+
+
+
+module.exports = { addProject, fetchProjects };
