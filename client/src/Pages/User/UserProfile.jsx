@@ -7,6 +7,7 @@ import { toast } from "react-hot-toast";
 import { UserDataContext } from "../../Context/UserContext";
 import SyncLoader from "react-spinners/SyncLoader";
 import { SocketContext } from "../../Context/SocketContext";
+import DetailedProject from "../../Components/DetailedProject";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -20,7 +21,6 @@ const UserProfile = () => {
     : "https://devsphere-backend-bxxx.onrender.com";
 
   const { id } = useParams();
-  console.log(id);
   const [userDetails, setuserDetails] = useState([]);
 
   useEffect(() => {
@@ -116,37 +116,11 @@ const UserProfile = () => {
       projects: 28,
       contributions: 456,
     },
-    projects: [
-      {
-        title: "E-Commerce Dashboard",
-        description:
-          "A comprehensive dashboard for managing online store operations",
-        tech: ["React", "Node.js", "MongoDB"],
-        likes: 234,
-        comments: 45,
-        image: "/api/placeholder/300/200",
-      },
-      {
-        title: "Social Media Analytics Tool",
-        description: "Real-time analytics platform for social media management",
-        tech: ["Vue.js", "Python", "PostgreSQL"],
-        likes: 189,
-        comments: 32,
-        image: "/api/placeholder/300/200",
-      },
-      {
-        title: "Task Management App",
-        description: "Collaborative task management solution for remote teams",
-        tech: ["React Native", "Firebase"],
-        likes: 156,
-        comments: 28,
-        image: "/api/placeholder/300/200",
-      },
-    ],
   };
 
   const [projects, setProjects] = useState([]);
   const [count, setCount] = useState(0);
+  const [dispProject, setDispProject] = useState(false);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -161,15 +135,18 @@ const UserProfile = () => {
       const data = await response.json();
       if (response.ok) {
         setProjects(data.projects);
-        setCount(data.count)
+        setCount(data.count);
       } else {
         toast.error(data.message);
       }
       setLoading(false);
     };
-    if (id) fetchProjects();
-  }, [API_BASE_URL, id]);
-
+    if (id.indexOf("@") !== -1) {
+      navigate(`/user/:${id}`);
+    } else {
+      fetchProjects();
+    }
+  }, [API_BASE_URL, id, navigate]);
 
   return (
     <div className="bg-yellow-50 min-h-screen">
@@ -311,9 +288,7 @@ const UserProfile = () => {
                   </div>
                   <div className="bg-green-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                     <div className="text-center">
-                      <p className="text-2xl font-black">
-                        {count}
-                      </p>
+                      <p className="text-2xl font-black">{count}</p>
                       <p className="text-gray-700 font-bold">Projects</p>
                     </div>
                   </div>
@@ -396,23 +371,43 @@ const UserProfile = () => {
                           className="bg-white border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
                         >
                           <div className="p-4">
-                            <h3 className="text-xl font-bold mb-2">
+                            <NavLink
+                              to={`/user/user_profile/${project.userId._id}`}
+                              className="flex items-center gap-3 mb-4"
+                            >
+                              <img
+                                src={project.userId.avatar}
+                                alt={project.username}
+                                className="w-8 h-8 md:w-10 md:h-10 border-2 border-black"
+                              />
+                              <div>
+                                <h3 className="font-bold">
+                                  {project.userId.name}
+                                </h3>
+                                <h5 className="text-gray-500 text-xs">
+                                  @{project.userId.username}
+                                </h5>
+                              </div>
+                            </NavLink>
+                            <h4 className="text-lg md:text-xl font-black mb-4">
                               {project.title}
-                            </h3>
+                            </h4>
                             <p
                               className="mb-3 text-gray-600 project-description"
                               dangerouslySetInnerHTML={{
                                 __html:
-                                  project.description.length > 500
-                                    ? project.description
-                                        ?.substring(0, 500)
-                                        .replace(/<(?!.*<)/, "")
+                                  project.description.length > 200
+                                    ? project.description?.substring(0, 150) +
+                                      "..."
                                     : project.description,
                               }}
                             ></p>
-                            <NavLink to="/" className="block mb-4 text-blue-500 font-semibold">
+                            <div
+                              className="block mb-4 text-blue-500 font-semibold cursor-pointer"
+                              onClick={() => setDispProject(true)}
+                            >
                               Read more ...
-                            </NavLink>
+                            </div>
                             <div className="flex flex-wrap gap-2 mb-4">
                               {project.technologies.map((tech, techIndex) => (
                                 <span
@@ -434,6 +429,19 @@ const UserProfile = () => {
                               </span>
                             </div>
                           </div>
+                          {dispProject && (
+                            <DetailedProject
+                              title={project.title}
+                              userImage={project.userId.avatar}
+                              Name={project.userId.name}
+                              username={project.userId.username}
+                              setDispProject={setDispProject}
+                              description={project.description}
+                              githublink={project.githubRepo}
+                              demoUrl={project?.demoUrl || ""}
+                              projectTechnologies={project.technologies}
+                            />
+                          )}
                         </div>
                       ))}
                 </div>

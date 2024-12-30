@@ -1,5 +1,6 @@
 const projectModel = require("../models/project.model");
 const UserModel = require("../models/user.model");
+const hashtagModel = require("../models/hashtag.model");
 const NotificationModel = require("../models/handleNotification.model");
 const { getReceiverSocketId, io } = require("../Socket/socket");
 
@@ -52,6 +53,15 @@ const addProject = async (req, res) => {
       });
     }
 
+    // Update hashtag counts
+    for (const techId of technologies) {
+      await hashtagModel.findByIdAndUpdate(
+        techId,
+        { $inc: { count: 1 } },
+        { new: true }
+      );
+    }
+
     // Create the project
     await projectModel.create({
       title,
@@ -69,20 +79,32 @@ const addProject = async (req, res) => {
   }
 };
 
-const fetchProjects = async (req, res) =>  {
+const fetchProjects = async (req, res) => {
   const { id } = req.body;
   try {
-    const projects = await projectModel.find({ userId: id }).populate("technologies");
+    const projects = await projectModel
+      .find({ userId: id })
+      .populate("technologies")
+      .populate("userId");
     const count = await projectModel.countDocuments({ userId: id });
     if (!projects) {
-      return res.status(200).json({ projects:[] , count:0});
+      return res.status(200).json({ projects: [], count: 0 });
     }
-    return res.status(200).json({ projects , count});
+    return res.status(200).json({ projects, count });
   } catch (error) {
     return res.status(500).json({ message: "SERVER ERROR " + error });
   }
 };
 
+const deleteProject = async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) return res.status(400).json({ message: "Id is required" });
+    await projectModel.findOneAndDelete(id);
+    return res.status(200).json({ message: "Project Deleted" });
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR : " + error });
+  }
+};
 
-
-module.exports = { addProject, fetchProjects };
+module.exports = { addProject, fetchProjects,deleteProject };

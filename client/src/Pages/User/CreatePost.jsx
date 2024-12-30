@@ -107,7 +107,7 @@ const ProjectSubmission = () => {
     e.preventDefault();
     try {
       const descData = formData.description || ""; // Ensure description is defined
-      descData.includes("")
+      descData.includes("");
       const parser = new DOMParser();
       const doc = parser.parseFromString(descData, "text/html");
       const anchorTags = doc.querySelectorAll("a");
@@ -147,7 +147,7 @@ const ProjectSubmission = () => {
         githubRepo: formData.githubRepo,
         demoUrl: formData.demoUrl,
         technologies, // Assuming technologies is defined
-        description: formData.description.replace("_blank","_self"),
+        description: formData.description.replace("_blank", "_self"),
         userId: user?._id, // Safely access user._id
         tagedUsers: filteredTags,
       };
@@ -198,6 +198,7 @@ const ProjectSubmission = () => {
             </span>
           </h1>
           <form onSubmit={handleSubmit}>
+            
             {/* Project Title */}
             <div className="mb-6">
               <label className="block text-xl font-bold mb-2">
@@ -213,10 +214,29 @@ const ProjectSubmission = () => {
               />
             </div>
 
+            {/* Project Description */}
+            <div className="mb-6">
+              <label className="text-xl font-bold mb-2 block">
+                Project Description
+                <span className="text-red-500">*</span> :
+                <span className="font-normal text-xs ml-2">
+                  (You can mention your partner by typing &apos;@&apos; followed
+                  by their username, and select the text and click on link icon.
+                  the list.)
+                </span>
+              </label>
+              <ReactQuill
+                value={formData.description}
+                onChange={handleDescriptionChange}
+                className="w-full p-4 text-lg border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all min-h-[200px] rounded-lg"
+                placeholder="Tell us about your project..."
+              />
+            </div>
+
             {/* Technologies Used */}
             <div className="mb-6">
               <label className="block text-xl font-bold mb-2">
-                <span className="whitespace-nowrap">Technologies Used</span>
+                <span className="whitespace-nowrap">Hashtags</span>
                 <span className="text-red-500">*</span> :
               </label>
               <div className="flex flex-col sm:flex-row gap-2">
@@ -269,25 +289,6 @@ const ProjectSubmission = () => {
                   </span>
                 ))}
               </div>
-            </div>
-
-            {/* Project Description */}
-            <div className="mb-6">
-              <label className="text-xl font-bold mb-2 block">
-                Project Description
-                <span className="text-red-500">*</span> :
-                <span className="font-normal text-xs ml-2">
-                  (You can mention your partner by typing &apos;@&apos; followed
-                  by their username, and select the text and click on link icon.
-                  the list.)
-                </span>
-              </label>
-              <ReactQuill
-                value={formData.description}
-                onChange={handleDescriptionChange}
-                className="w-full p-4 text-lg border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all min-h-[200px] rounded-lg"
-                placeholder="Tell us about your project..."
-              />
             </div>
 
             {/* GitHub Repo */}

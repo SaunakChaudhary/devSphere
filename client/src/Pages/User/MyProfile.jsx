@@ -7,12 +7,14 @@ import { toast } from "react-hot-toast";
 import { NavLink, useNavigate } from "react-router-dom";
 import SyncLoader from "react-spinners/SyncLoader";
 import { SocketContext } from "../../Context/SocketContext";
+import DetailedProject from "../../Components/DetailedProject";
 
 const MyProfile = () => {
   const { socket } = useContext(SocketContext);
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  // useEffect(() => {
+  //   window.scrollTo(0, 0);
+  // }, []);
+
   const navigate = useNavigate();
   const [showFullBio, setShowFullBio] = useState(false);
 
@@ -28,6 +30,19 @@ const MyProfile = () => {
   const { user } = useContext(UserDataContext);
   const [userDetails, setuserDetails] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [edit, setEdit] = useState([]);
+
+  const handleTogle = (index) => {
+    setEdit((prevEdit) => {
+      const newEdit = [...prevEdit];
+      if (newEdit[index] === undefined) {
+        newEdit[index] = true;
+      } else {
+        newEdit[index] = !newEdit[index];
+      }
+      return newEdit;
+    });
+  };
 
   useEffect(() => {
     const userDetail = async () => {
@@ -91,7 +106,8 @@ const MyProfile = () => {
 
   const [projects, setProjects] = useState([]);
   const [count, setCount] = useState(0);
-
+  const [dispProject, setDispProject] = useState(false);
+  const [delteUp, setDeleteUp] = useState(false);
   useEffect(() => {
     const fetchProjects = async () => {
       setIsLoading(true);
@@ -106,13 +122,35 @@ const MyProfile = () => {
       if (response.ok) {
         setProjects(data.projects);
         setCount(data.count);
+        setDeleteUp(false);
       } else {
         toast.error(data.message);
       }
       setIsLoading(false);
     };
     if (user?._id) fetchProjects();
-  }, [API_BASE_URL, user?._id]);
+  }, [API_BASE_URL, user?._id,delteUp]);
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/project/deleteProject`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json", // Set header for JSON data
+        },
+        body: JSON.stringify({ id }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message);
+        setDeleteUp(true);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error);
+    }
+  };
 
   return (
     <div className="bg-yellow-50 min-h-screen">
@@ -247,9 +285,7 @@ const MyProfile = () => {
                   </div>
                   <div className="bg-green-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
                     <div className="text-center">
-                      <p className="text-2xl font-black">
-                        {count}
-                      </p>
+                      <p className="text-2xl font-black">{count}</p>
                       <p className="text-gray-700 font-bold">Projects</p>
                     </div>
                   </div>
@@ -331,24 +367,63 @@ const MyProfile = () => {
                           key={index}
                           className="bg-white border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
                         >
-                          <div className="p-4">
-                            <h3 className="text-xl font-bold mb-2">
+                          <div className="p-4 relative">
+                            <div className="flex justify-between">
+                              <NavLink
+                                to={`/user/user_profile/${project.userId._id}`}
+                                className="flex items-center gap-3 mb-4"
+                              >
+                                <img
+                                  src={project.userId.avatar}
+                                  alt={project.username}
+                                  className="w-8 h-8 md:w-10 md:h-10 border-2 border-black"
+                                />
+                                <div>
+                                  <h3 className="font-bold">
+                                    {project.userId.name}
+                                  </h3>
+                                  <h5 className="text-gray-500 text-xs">
+                                    @{project.userId.username}
+                                  </h5>
+                                </div>
+                              </NavLink>
+                              <i
+                                onClick={() => handleTogle(index)}
+                                className="ri-more-2-fill cursor-pointer"
+                              ></i>
+                            </div>
+                            {edit[index] && (
+                              <div className="absolute top-12 right-4">
+                                <button className="block mb-1 text-yellow-500 font-semibold px-2 border shadow-[1px_1px_0px_black] border-black w-24 bg-white">
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(project._id)}
+                                  className="block text-red-500 font-semibold px-2 border shadow-[1px_1px_0px_black] border-black w-24 bg-white"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                            <h4 className="text-lg md:text-xl font-black mb-4">
                               {project.title}
-                            </h3>
+                            </h4>
                             <p
                               className="mb-3 text-gray-600 project-description"
                               dangerouslySetInnerHTML={{
                                 __html:
                                   project.description.length > 500
-                                    ? project.description
-                                        ?.substring(0, 500)
-                                        .replace(/<(?!.*<)/, "")
+                                    ? project.description?.substring(0, 150) +
+                                      "..."
                                     : project.description,
                               }}
                             ></p>
-                            <NavLink to={`/user/project/${project._id}`} className="block mb-4 text-blue-500 font-semibold">
+                            <div
+                              className="block mb-4 text-blue-500 font-semibold cursor-pointer"
+                              onClick={() => setDispProject(true)}
+                            >
                               Read more ...
-                            </NavLink>
+                            </div>
                             <div className="flex flex-wrap gap-2 mb-4">
                               {project.technologies.map((tech, techIndex) => (
                                 <span
@@ -370,6 +445,19 @@ const MyProfile = () => {
                               </span>
                             </div>
                           </div>
+                          {dispProject && (
+                            <DetailedProject
+                              title={project.title}
+                              userImage={project.userId.avatar}
+                              Name={project.userId.name}
+                              username={project.userId.username}
+                              setDispProject={setDispProject}
+                              description={project.description}
+                              githublink={project.githubRepo}
+                              demoUrl={project?.demoUrl || ""}
+                              projectTechnologies={project.technologies}
+                            />
+                          )}
                         </div>
                       ))}
                 </div>
