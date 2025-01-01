@@ -134,7 +134,7 @@ const UserNavbar = ({ page }) => {
       </div>
 
       {/* For Mobile View Slidebar */}
-      <div className="fixed bottom-0 w-full bg-white h-20 flex sm:hidden justify-evenly items-center">
+      <div className="fixed bottom-0 w-full bg-white h-20 flex sm:hidden justify-evenly items-center z-10">
         <div className="p-3">
           <NavLink to="/dashboard">
             <i

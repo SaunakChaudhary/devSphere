@@ -1,31 +1,43 @@
-/* eslint-disable no-unused-vars */
-import { useState, useEffect, useContext } from "react";
-import UserNavbar from "../../Components/UserNavbar";
-import UserSlidebar from "../../Components/UserSlidebar";
-import { UserDataContext } from "../../Context/UserContext";
+/* eslint-disable react/prop-types */
+import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import { UserDataContext } from "../Context/UserContext";
 import SyncLoader from "react-spinners/SyncLoader";
 
-const ProjectSubmission = () => {
-  const [isLoading, setIsLoading] = useState(false);
-
+const UpdProject = ({
+  title,
+  userImage,
+  Name,
+  username,
+  setUpdProject,
+  description,
+  githublink,
+  demoUrl,
+  projectId,
+  projectTechnologies,
+}) => {
   const { user } = useContext(UserDataContext);
+
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [allhashTags, setAllHashtags] = useState([]);
   const [filteredHashtags, setFilteredHashtags] = useState([]);
   const [currentTag, setCurrentTag] = useState("");
-  const [technologies, setTechnologies] = useState([]);
+  const [technologies, setTechnologies] = useState(projectTechnologies);
   const [users, setUsers] = useState([]);
+
+  const [formData, setFormData] = useState({
+    title: title,
+    description: description,
+    githublink: githublink,
+    demoUrl: demoUrl,
+    projectTechnologies: projectTechnologies,
+  });
 
   useEffect(() => {
     const getAllHashtags = async () => {
@@ -75,21 +87,6 @@ const ProjectSubmission = () => {
     setFilteredHashtags(arr);
   }, [currentTag, allhashTags]);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    githubRepo: "",
-    description: "",
-    demoUrl: "",
-  });
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const handleAddHashtag = () => {
     if (currentTag) {
       const result = allhashTags.find((item) => item.tag === currentTag);
@@ -108,11 +105,22 @@ const ProjectSubmission = () => {
     });
   };
 
+  const handleDescriptionChange = (value) => {
+    setFormData({ ...formData, description: value });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const descData = formData.description || ""; // Ensure description is defined
-      descData.includes("");
+      const descData = formData.description || "";
       const parser = new DOMParser();
       const doc = parser.parseFromString(descData, "text/html");
       const anchorTags = doc.querySelectorAll("a");
@@ -130,7 +138,6 @@ const ProjectSubmission = () => {
           return false;
         })
         .map((tag) => tag.split("@")[1]);
-
       const notFilteredTags = anchorContents.filter((tag) => {
         if (tag.charAt(0) === "@") {
           const username = tag.split("@")[1]; // Extract username
@@ -156,10 +163,12 @@ const ProjectSubmission = () => {
         description: formData.description.replace("_blank", "_self"),
         userId: user?._id, // Safely access user._id
         tagedUsers: filteredTags,
+        projectId: projectId,
       };
       setIsLoading(true);
-      const response = await fetch(`${API_BASE_URL}/project/addProject`, {
-        method: "POST",
+
+      const response = await fetch(`${API_BASE_URL}/project/editProject`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -171,44 +180,45 @@ const ProjectSubmission = () => {
 
       if (response.ok) {
         toast.success(data.message);
-        setTechnologies([]);
-        setFormData({
-          title: "",
-          githubRepo: "",
-          description: "",
-          demoUrl: "",
-        });
+        setUpdProject(false);
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error("Error in handleSubmit:", error); // Log error for debugging
-      toast.error("An error occurred while submitting the form.");
+      toast.error(error);
     }
   };
 
-  const handleDescriptionChange = (value) => {
-    setFormData({ ...formData, description: value });
-  };
-
   return (
-    <div className="bg-yellow-50 min-h-screen">
-      <UserNavbar page="Create" />
+    <div className="fixed inset-0 bg-black bg-opacity-45 overflow-y-auto">
       {isLoading && (
         <div className="flex justify-center items-center text-white fixed top-0 w-full h-screen bg-black bg-opacity-45 z-50">
           <SyncLoader color="skyblue" loading={isLoading} size={15} />
         </div>
       )}
-      <div className="flex flex-col md:flex-row p-4">
-        <UserSlidebar />
-        <div className="mb-20 mx-auto bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 md:p-10 w-full max-w-4xl">
-          {/* Header */}
-          <h1 className="text-3xl md:text-4xl font-black mb-8 flex items-center gap-4">
-            <span>
-              Share Your Awesome Project
-              <i className=" ml-2 ri-lightbulb-flash-fill text-yellow-500 text-3xl"></i>
-            </span>
-          </h1>
+      <button
+        onClick={() => setUpdProject(false)}
+        className="absolute top-2 right-2 text-white w-12 h-12 transition-all hover:-translate-y-0.5 active:translate-y-0 active:shadow-none font-bold text-2xl"
+        aria-label="Close"
+      >
+        ✕
+      </button>
+      <div className="min-h-screen py-12 px-4">
+        <div className="w-full max-w-4xl bg-white border-4 border-black p-4 md:p-8 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mx-auto">
+          {/* User Info */}
+          <div className="flex items-center gap-3 mb-4">
+            <img
+              src={userImage}
+              alt={Name}
+              className="w-8 h-8 md:w-16 md:h-16 border-2 border-black"
+            />
+            <div>
+              <h3 className="font-bold md:text-2xl">{Name}</h3>
+              <h5 className="text-gray-500 text-xs md:text-base">
+                @{username}
+              </h5>
+            </div>
+          </div>
           <form onSubmit={handleSubmit}>
             {/* Project Title */}
             <div className="mb-6">
@@ -310,7 +320,7 @@ const ProjectSubmission = () => {
               <input
                 type="url"
                 name="githubRepo"
-                value={formData.githubRepo}
+                value={formData.githublink}
                 onChange={handleInputChange}
                 className="w-full p-4 text-lg border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all rounded-lg"
                 placeholder="https://github.com/username/repo"
@@ -332,14 +342,17 @@ const ProjectSubmission = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-end">
-              <button className="w-full sm:w-auto bg-white text-black font-bold py-4 px-8 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 active:translate-x-1 active:translate-y-1 active:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] rounded-lg">
+              <button
+                onClick={() => setUpdProject(false)}
+                className="w-full sm:w-auto bg-white text-black font-bold py-4 px-8 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 active:translate-x-1 active:translate-y-1 active:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] rounded-lg"
+              >
                 Cancel
               </button>
               <button
                 type="submit"
                 className="w-full sm:w-auto bg-green-500 text-white font-bold py-4 px-8 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-green-600 active:translate-x-1 active:translate-y-1 active:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] rounded-lg"
               >
-                Submit Project
+                Edit Project
                 <i className="ri-send-plane-fill text-xl ml-2"></i>
               </button>
             </div>
@@ -350,4 +363,4 @@ const ProjectSubmission = () => {
   );
 };
 
-export default ProjectSubmission;
+export default UpdProject;

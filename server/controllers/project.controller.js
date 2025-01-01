@@ -107,4 +107,71 @@ const deleteProject = async (req, res) => {
   }
 };
 
-module.exports = { addProject, fetchProjects,deleteProject };
+const editProject = async (req, res) => {
+  try {
+    const {
+      projectId,
+      title,
+      githubRepo,
+      demoUrl,
+      technologies,
+      description,
+      userId,
+      tagedUsers,
+    } = req.body;
+
+    if (!projectId) return res.status(400).json({ message: "Id is required" });
+
+    const mentionedUser = await projectModel.findById(projectId);
+
+    // Fetch all tagged users in a single query
+    const taggedUserDetails = await UserModel.find({
+      username: { $in: tagedUsers },
+    });
+
+    // Iterate over the tagged users
+    for (const taggedUser of taggedUserDetails) {
+      const receiverSocketId = getReceiverSocketId(taggedUser._id);
+
+      if (!mentionedUser.tagedUsers.includes(taggedUser._id)) {
+        if (receiverSocketId) {
+          const notification = {
+            type: "info",
+            message: "is Mentioned you in their Project",
+            user: taggedUser,
+          };
+          // Emit notification via socket
+          io.to(receiverSocketId).emit("newMessage", notification);
+        }
+        // Save notification to the database
+        await NotificationModel.create({
+          sender: userId,
+          recipient: taggedUser._id,
+          content: "is Mentioned you in their Project",
+          type: "message",
+        });
+      }
+    }
+
+    const updProject = await projectModel.findByIdAndUpdate(
+      projectId,
+      {
+        title: title,
+        githubRepo: githubRepo,
+        demoUrl: demoUrl,
+        technologies: technologies,
+        description: description,
+        userId: userId,
+        tagedUsers: taggedUserDetails.map((user) => user._id),
+      },
+      { new: true }
+    );
+    return res
+      .status(200)
+      .json({ message: "Project Updated", project: updProject });
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR : " + error });
+  }
+};
+
+module.exports = { addProject, fetchProjects, deleteProject, editProject };

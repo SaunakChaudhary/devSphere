@@ -8,13 +8,14 @@ import { NavLink, useNavigate } from "react-router-dom";
 import SyncLoader from "react-spinners/SyncLoader";
 import { SocketContext } from "../../Context/SocketContext";
 import DetailedProject from "../../Components/DetailedProject";
+import UpdProject from "../../Components/UpdProject";
 
 const MyProfile = () => {
   const { socket } = useContext(SocketContext);
-  // useEffect(() => {
-  //   window.scrollTo(0, 0);
-  // }, []);
 
+  const [delteUp, setDeleteUp] = useState(false);
+  const [dispProject, setDispProject] = useState(false);
+  const [updProject, setUpdProject] = useState(false);
   const navigate = useNavigate();
   const [showFullBio, setShowFullBio] = useState(false);
 
@@ -29,7 +30,7 @@ const MyProfile = () => {
 
   const { user } = useContext(UserDataContext);
   const [userDetails, setuserDetails] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [edit, setEdit] = useState([]);
 
   const handleTogle = (index) => {
@@ -93,7 +94,7 @@ const MyProfile = () => {
         fetchData();
       });
     }
-  }, [API_BASE_URL, socket, user._id]);
+  }, [API_BASE_URL, socket, user._id,delteUp]);
 
   const userData = {
     points: 1250,
@@ -106,8 +107,7 @@ const MyProfile = () => {
 
   const [projects, setProjects] = useState([]);
   const [count, setCount] = useState(0);
-  const [dispProject, setDispProject] = useState(false);
-  const [delteUp, setDeleteUp] = useState(false);
+
   useEffect(() => {
     const fetchProjects = async () => {
       setIsLoading(true);
@@ -129,7 +129,7 @@ const MyProfile = () => {
       setIsLoading(false);
     };
     if (user?._id) fetchProjects();
-  }, [API_BASE_URL, user?._id,delteUp]);
+  }, [API_BASE_URL, user?._id, delteUp,updProject]);
 
   const handleDelete = async (id) => {
     try {
@@ -394,7 +394,10 @@ const MyProfile = () => {
                             </div>
                             {edit[index] && (
                               <div className="absolute top-12 right-4">
-                                <button className="block mb-1 text-yellow-500 font-semibold px-2 border shadow-[1px_1px_0px_black] border-black w-24 bg-white">
+                                <button
+                                  onClick={() => setUpdProject(true)}
+                                  className="block mb-1 text-yellow-500 font-semibold px-2 border shadow-[1px_1px_0px_black] border-black w-24 bg-white"
+                                >
                                   Edit
                                 </button>
                                 <button
@@ -452,6 +455,21 @@ const MyProfile = () => {
                               Name={project.userId.name}
                               username={project.userId.username}
                               setDispProject={setDispProject}
+                              description={project.description}
+                              githublink={project.githubRepo}
+                              demoUrl={project?.demoUrl || ""}
+                              projectTechnologies={project.technologies}
+                            />
+                          )}
+
+                          {updProject && (
+                            <UpdProject
+                              projectId={project._id}
+                              title={project.title}
+                              userImage={project.userId.avatar}
+                              Name={project.userId.name}
+                              username={project.userId.username}
+                              setUpdProject={setUpdProject}
                               description={project.description}
                               githublink={project.githubRepo}
                               demoUrl={project?.demoUrl || ""}
