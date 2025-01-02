@@ -55,7 +55,6 @@ io.on("connection", (socket) => {
       // If no more sockets are associated with the user, remove the entry
       if (userSocketMap[userId].length === 0) {
         delete userSocketMap[userId];
-        console.log(`User ${userId} fully disconnected`);
       }
     }
   });

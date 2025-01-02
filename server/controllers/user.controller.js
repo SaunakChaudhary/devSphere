@@ -1,6 +1,6 @@
 const UserModel = require("../models/user.model");
 const cloudinary = require("../utils/cloudinary.config");
-const followLikeModel = require("../models/followLike.model");
+const followModel = require("../models/follow.model");
 const mongoose = require("mongoose");
 const NotificationModel = require("../models/handleNotification.model");
 const { getReceiverSocketId, io } = require("../Socket/socket");
@@ -112,12 +112,12 @@ const followUnFollow = async (req, res) => {
 
     // Fetch or create documents for both users concurrently
     const [loggedInUserDoc, searchedUserDoc] = await Promise.all([
-      followLikeModel.findOneAndUpdate(
+      followModel.findOneAndUpdate(
         { user: loggedInUserObjectId },
         { $setOnInsert: { user: loggedInUserObjectId, following: [] } },
         { new: true, upsert: true }
       ),
-      followLikeModel.findOneAndUpdate(
+      followModel.findOneAndUpdate(
         { user: searchedUserObjectId },
         { $setOnInsert: { user: searchedUserObjectId, followers: [] } },
         { new: true, upsert: true }
@@ -130,14 +130,14 @@ const followUnFollow = async (req, res) => {
 
     // Update both `following` and `followers` arrays concurrently
     const [updateLoggedInUser, updateSearchedUser] = await Promise.all([
-      followLikeModel.findOneAndUpdate(
+      followModel.findOneAndUpdate(
         { user: loggedInUserObjectId },
         isFollowing
           ? { $pull: { following: searchedUserObjectId } }
           : { $addToSet: { following: searchedUserObjectId } },
         { new: true }
       ),
-      followLikeModel.findOneAndUpdate(
+      followModel.findOneAndUpdate(
         { user: searchedUserObjectId },
         isFollowing
           ? { $pull: { followers: loggedInUserObjectId } }
@@ -189,7 +189,7 @@ const displayAllCounts = async (req, res) => {
       if (!mongoose.Types.ObjectId.isValid(user)) {
         return res.status(400).json({ message: "Invalid user IDs" });
       }
-      const followData = await followLikeModel.findOne({ user });
+      const followData = await followModel.findOne({ user });
       if (!followData) {
         return res.status(200).json({
           countFollowers: 0,
@@ -207,7 +207,7 @@ const displayAllCounts = async (req, res) => {
     }
     const searchedUserObjectId = new mongoose.Types.ObjectId(SearchedUserId);
 
-    const followData = await followLikeModel.findOne({
+    const followData = await followModel.findOne({
       user: searchedUserObjectId,
     });
 
@@ -240,7 +240,7 @@ const getFollowersFollowing = async (req, res) => {
       return res.status(400).json({ message: "User Not Available" });
     }
 
-    const userId = await followLikeModel
+    const userId = await followModel
       .findOne({ user: id })
       .populate("following")
       .populate("followers");

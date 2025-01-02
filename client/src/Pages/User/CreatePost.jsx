@@ -232,8 +232,7 @@ const ProjectSubmission = () => {
                 <span className="text-red-500">*</span> :
                 <span className="font-normal text-xs ml-2">
                   (You can mention your partner by typing &apos;@&apos; followed
-                  by their username, and select the text and click on link icon.
-                  the list.)
+                  by their username, click on the link icon and save.)
                 </span>
               </label>
               <ReactQuill

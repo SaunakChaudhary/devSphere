@@ -14,16 +14,6 @@ const followLikeSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
-    likes: [{
-        post: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Post'
-        },
-        likedAt: {
-            type: Date,
-            default: Date.now
-        }
-    }]
 }, {
     timestamps: true
 });

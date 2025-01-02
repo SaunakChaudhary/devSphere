@@ -94,7 +94,7 @@ const MyProfile = () => {
         fetchData();
       });
     }
-  }, [API_BASE_URL, socket, user._id,delteUp]);
+  }, [API_BASE_URL, socket, user._id, delteUp]);
 
   const userData = {
     points: 1250,
@@ -129,7 +129,7 @@ const MyProfile = () => {
       setIsLoading(false);
     };
     if (user?._id) fetchProjects();
-  }, [API_BASE_URL, user?._id, delteUp,updProject]);
+  }, [API_BASE_URL, user?._id, delteUp, updProject]);
 
   const handleDelete = async (id) => {
     try {
@@ -149,6 +149,27 @@ const MyProfile = () => {
       }
     } catch (error) {
       toast.error(error);
+    }
+  };
+
+  const handleLike = async (projectId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/project/likeUnlikePost`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ projectId, userId:user._id }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setDeleteUp(true);
+      }
+      else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -438,10 +459,23 @@ const MyProfile = () => {
                               ))}
                             </div>
                             <div className="flex items-center gap-4 text-gray-600">
-                              <span className="flex items-center gap-1">
-                                <i className="ri-heart-line"></i>
-                                {/* {project.likes} */}
-                              </span>
+                              <button
+                                onClick={() =>
+                                  handleLike(project._id)
+                                }
+                                className="flex items-center gap-1 transition-colors"
+                              >
+                                <i
+                                  className={`${
+                                    project.likes.includes(user._id)
+                                      ? "ri-heart-fill text-red-500"
+                                      : "ri-heart-line"
+                                  }`}
+                                />
+                                <span className="text-sm">
+                                  {project.likes.length}
+                                </span>
+                              </button>
                               <span className="flex items-center gap-1">
                                 <i className="ri-chat-1-line"></i>
                                 {/* {project.comments} */}

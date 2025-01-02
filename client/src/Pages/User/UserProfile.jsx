@@ -23,7 +23,7 @@ const UserProfile = () => {
   const { id } = useParams();
   const [userDetails, setuserDetails] = useState([]);
 
-  useEffect(() => {
+useEffect(() => {
     const fetchUserDetails = async () => {
       try {
         setLoading(true);
@@ -87,7 +87,7 @@ const UserProfile = () => {
         fetchData();
       });
     }
-  }, [API_BASE_URL, id, user._id, updateState1, socket]);
+  }, [API_BASE_URL, id, user._id, updateState1, socket ]);
 
   const handleFollow = async () => {
     setLoading(true);
@@ -146,7 +146,27 @@ const UserProfile = () => {
     } else {
       fetchProjects();
     }
-  }, [API_BASE_URL, id, navigate]);
+  }, [API_BASE_URL, id, navigate,updateState1]);
+
+  const handleLike = async (projectId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/project/likeUnlikePost`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ projectId, userId: user._id }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setUpdateState1(true);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     <div className="bg-yellow-50 min-h-screen">
@@ -419,10 +439,21 @@ const UserProfile = () => {
                               ))}
                             </div>
                             <div className="flex items-center gap-4 text-gray-600">
-                              <span className="flex items-center gap-1">
-                                <i className="ri-heart-line"></i>
-                                {/* {project.likes} */}
-                              </span>
+                              <button
+                                onClick={() => handleLike(project._id)}
+                                className="flex items-center gap-1 transition-colors"
+                              >
+                                <i
+                                  className={`${
+                                    project.likes.includes(user._id)
+                                      ? "ri-heart-fill text-red-500"
+                                      : "ri-heart-line"
+                                  }`}
+                                />
+                                <span className="text-sm">
+                                  {project.likes.length}
+                                </span>
+                              </button>
                               <span className="flex items-center gap-1">
                                 <i className="ri-chat-1-line"></i>
                                 {/* {project.comments} */}

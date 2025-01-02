@@ -174,4 +174,61 @@ const editProject = async (req, res) => {
   }
 };
 
-module.exports = { addProject, fetchProjects, deleteProject, editProject };
+const likeUnlikePost = async (req, res) => {
+  const { userId, projectId } = req.body;
+
+  try {
+    const project = await projectModel.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    let updatedProject;
+
+    // Check if the user has already liked the post
+    if (project.likes.includes(userId)) {
+      updatedProject = await projectModel.findByIdAndUpdate(
+        projectId,
+        { $pull: { likes: userId } },
+        { new: true } // Get the updated document
+      );
+    } else {
+      updatedProject = await projectModel.findByIdAndUpdate(
+        projectId,
+        { $push: { likes: userId } },
+        { new: true } // Get the updated document
+      );
+
+      const receiverSocketId = getReceiverSocketId(updatedProject.userId);
+      const user = await UserModel.findById(userId);
+      if (receiverSocketId) {
+        const notification = {
+          type: "info",
+          message: "is liked your " + updatedProject.title + " Project",
+          user: user,
+        };
+        // Emit notification via socket
+        io.to(receiverSocketId).emit("newMessage", notification);
+      }
+      // Save notification to the database
+      await NotificationModel.create({
+        sender: userId,
+        recipient: updatedProject.userId,
+        content: "is Liked your " + updatedProject.title + " Project",
+        type: "message",
+      });
+    }
+
+    return res.status(200).json({ likes: updatedProject.likes.length });
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR: " + error.message });
+  }
+};
+
+module.exports = {
+  addProject,
+  fetchProjects,
+  deleteProject,
+  editProject,
+  likeUnlikePost,
+};
