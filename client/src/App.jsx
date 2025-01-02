@@ -20,6 +20,7 @@ import DispFollowUsers from "./Pages/User/DispFollowUsers";
 import MyProfile from "./Pages/User/MyProfile";
 import Notifications from "./Pages/User/Notification";
 import Redirect from "./Pages/User/Redirect";
+import ProjectsHashtag from "./Pages/User/ProjectsHashtag";
 
 const App = () => {
   return (
@@ -143,6 +144,14 @@ const App = () => {
           </UserProtected>
         }
       />
+      <Route
+        path="/user/projects/:id"
+        element={
+          <UserProtected>
+            <ProjectsHashtag />
+          </UserProtected>
+        }
+      />{" "}
       <Route path="/user/:id" element={<Redirect />} />{" "}
     </Routes>
   );

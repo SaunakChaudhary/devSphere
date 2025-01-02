@@ -2,7 +2,7 @@ import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 import "remixicon/fonts/remixicon.css";
 import { UserDataContext } from "../../Context/UserContext";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { NavLink, useNavigate } from "react-router-dom";
 import SyncLoader from "react-spinners/SyncLoader";
@@ -159,17 +159,27 @@ const MyProfile = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ projectId, userId:user._id }),
+        body: JSON.stringify({ projectId, userId: user._id }),
       });
       const data = await response.json();
       if (response.ok) {
         setDeleteUp(true);
-      }
-      else{
+      } else {
         toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.message);
+    }
+  };
+
+  const targetDivRef = useRef(null);
+
+  const handleScrollToDiv = () => {
+    if (targetDivRef.current) {
+      targetDivRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
 
@@ -304,7 +314,10 @@ const MyProfile = () => {
                       <p className="text-gray-700 font-bold">Following</p>
                     </div>
                   </div>
-                  <div className="bg-green-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                  <div
+                    onClick={handleScrollToDiv}
+                    className="cursor-pointer bg-green-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                  >
                     <div className="text-center">
                       <p className="text-2xl font-black">{count}</p>
                       <p className="text-gray-700 font-bold">Projects</p>
@@ -326,13 +339,16 @@ const MyProfile = () => {
                       userDetails?.interest &&
                       userDetails?.interest?.map((interest, index) => (
                         <span
+                          onClick={() =>
+                            navigate(`/user/projects/${interest.tag}`)
+                          }
                           key={index}
                           className={`
                         ${interest.type === "languages" && "bg-green-200"}
                         ${interest.type === "frontend" && "bg-purple-200"}
                         ${interest.type === "backend" && "bg-orange-200"}
                         ${interest.type === "other" && "bg-red-200"}
-                        px-4 py-2 font-bold border-2 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]
+                        cusor-pointer px-4 py-2 font-bold border-2 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]
                       `}
                         >
                           #{interest.tag}
@@ -378,7 +394,13 @@ const MyProfile = () => {
               </div>
 
               {/* Projects Section */}
-              <div className="bg-white border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 md:p-8 mb-20">
+              <div
+                ref={targetDivRef}
+                style={{
+                  padding: "20px",
+                }}
+                className="bg-white border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 md:p-8 mb-20"
+              >
                 <h2 className="text-2xl font-bold mb-4">Projects</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   {projects.length === 0
@@ -451,8 +473,11 @@ const MyProfile = () => {
                             <div className="flex flex-wrap gap-2 mb-4">
                               {project.technologies.map((tech, techIndex) => (
                                 <span
+                                  onClick={() =>
+                                    navigate(`/user/projects/${tech.tag}`)
+                                  }
                                   key={techIndex}
-                                  className="bg-gray-100 px-2 py-1 text-sm font-bold border-2 border-black"
+                                  className="cursor-pointer bg-gray-100 px-2 py-1 text-sm font-bold border-2 border-black"
                                 >
                                   #{tech.tag}
                                 </span>
@@ -460,9 +485,7 @@ const MyProfile = () => {
                             </div>
                             <div className="flex items-center gap-4 text-gray-600">
                               <button
-                                onClick={() =>
-                                  handleLike(project._id)
-                                }
+                                onClick={() => handleLike(project._id)}
                                 className="flex items-center gap-1 transition-colors"
                               >
                                 <i

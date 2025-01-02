@@ -4,20 +4,27 @@ import UserSlidebar from "../../Components/UserSlidebar";
 import "remixicon/fonts/remixicon.css";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import DetailedProject from "../../Components/DetailedProject";
+import toast from "react-hot-toast";
+import { UserDataContext } from "../../Context/UserContext";
+import { useContext } from "react";
 
 const Search = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const { user } = useContext(UserDataContext);
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilters, setActiveFilters] = useState([]);
   const [searchDataa, setSearchDataa] = useState([]);
   const navigate = useNavigate();
+  const [searchResults, setSearchResults] = useState([]);
+  const [checkLiked, setCheckLiked] = useState(false);
 
   // Search For a Result
   useEffect(() => {
@@ -31,6 +38,8 @@ const Search = () => {
       const data = await response.json();
       if (response.ok) {
         setSearchDataa(data.users);
+        setSearchResults(data.projects);
+        setCheckLiked(false);
       } else {
         console.log(data.message);
       }
@@ -40,57 +49,49 @@ const Search = () => {
     } else {
       setSearchDataa([]);
     }
-  }, [API_BASE_URL, searchQuery]);
+  }, [API_BASE_URL, searchQuery, checkLiked]);
 
-  // Sample data
-  const popularTags = [
-    { id: 1, name: "React", count: 245 },
-    { id: 2, name: "JavaScript", count: 189 },
-    { id: 3, name: "WebDev", count: 167 },
-    { id: 4, name: "Python", count: 145 },
-    { id: 5, name: "AI", count: 98 },
-    { id: 6, name: "CSS", count: 87 },
-  ];
+  const [popularTags, setPopularTags] = useState([]);
+  const [dispProject, setDispProject] = useState(false);
 
-  const searchResults = [
-    {
-      id: 1,
-      title: "Modern React Hooks Tutorial",
-      description:
-        "Learn how to use React Hooks effectively in your projects...",
-      author: "John Doe",
-      tags: ["React", "JavaScript"],
-      likes: 234,
-      comments: 45,
-    },
-    {
-      id: 2,
-      title: "Building Responsive Layouts",
-      description:
-        "Master CSS Grid and Flexbox for modern responsive designs...",
-      author: "Jane Smith",
-      tags: ["CSS", "WebDev"],
-      likes: 187,
-      comments: 32,
-    },
-    {
-      id: 3,
-      title: "Python Data Science Guide",
-      description: "Comprehensive guide to data analysis with Python...",
-      author: "Mike Johnson",
-      tags: ["Python", "AI"],
-      likes: 156,
-      comments: 28,
-    },
-  ];
-
-  const toggleFilter = (tag) => {
-    if (activeFilters.includes(tag)) {
-      setActiveFilters(activeFilters.filter((t) => t !== tag));
-    } else {
-      setActiveFilters([...activeFilters, tag]);
+  const handleLike = async (projectId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/project/likeUnlikePost`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ projectId, userId: user._id }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setCheckLiked(true);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
   };
+
+  useEffect(() => {
+    const popularTagsFunc = async () => {
+      const response = await fetch(`${API_BASE_URL}/hashtag/get-hashtags`, {
+        method: "GET",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        const popularTags = data
+          .filter((tag) => tag.count >= 1)
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10);
+        setPopularTags(popularTags);
+      } else {
+        console.log(data.message);
+      }
+    };
+    popularTagsFunc();
+  }, [API_BASE_URL]);
 
   return (
     <div className="bg-yellow-50 min-h-screen flex flex-col">
@@ -117,25 +118,23 @@ const Search = () => {
             </form>
 
             {/* Popular Tags */}
-            {searchDataa.length === 0 && <div className="mb-6">
-              <h3 className="font-bold text-lg mb-3">Popular Tags:</h3>
-              <div className="flex gap-3 flex-wrap">
-                {popularTags.map((tag) => (
-                  <button
-                    key={tag.id}
-                    onClick={() => toggleFilter(tag.name)}
-                    className={`px-4 py-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]  transition-all ${
-                      activeFilters.includes(tag.name)
-                        ? "bg-blue-500 text-white"
-                        : "bg-blue-100 hover:bg-blue-200"
-                    }`}
-                  >
-                    #{tag.name}
-                    <span className="ml-2 text-sm">({tag.count})</span>
-                  </button>
-                ))}
+            {searchDataa.length === 0 && (
+              <div className="mb-6">
+                <h3 className="font-bold text-lg mb-3">Popular Tags:</h3>
+                <div className="flex gap-3 flex-wrap">
+                  {popularTags.map((tag) => (
+                    <button
+                      onClick={() => navigate(`/user/projects/${tag.tag}`)}
+                      key={tag._id}
+                      className={`px-4 font-bold py-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]  transition-all bg-blue-100 hover:bg-blue-200`}
+                    >
+                      #{tag.tag}
+                      <span className="ml-2 text-sm">({tag.count})</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>}
+            )}
 
             {/* Search Results */}
             <div className="max-h-60 overflow-y-auto">
@@ -144,7 +143,7 @@ const Search = () => {
                   <div
                     key={idx}
                     className="cursor-pointer flex items-center gap-4 my-3 w-full p-4 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]  hover:bg-gray-200 transition-all"
-                    onClick={()=>navigate(`/user/user_profile/${user._id}`)}
+                    onClick={() => navigate(`/user/user_profile/${user._id}`)}
                   >
                     <div>
                       <img
@@ -168,52 +167,90 @@ const Search = () => {
           </section>
 
           {/* Results Section */}
-          <section className="mt-10">
+          <section className="mt-10 mb-20">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl md:text-2xl font-black">
-                Results ({searchResults.length})
+                Projects ({searchResults.length})
               </h2>
-              <p className="text-gray-600 font-bold">
-                Showing {searchResults.length} of {searchResults.length} results
-              </p>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {searchResults.map((result) => (
-                <div
-                  key={result.id}
-                  className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:-translate-y-1 transition-transform cursor-pointer"
-                >
-                  <h3 className="font-black text-lg mb-2">{result.title}</h3>
-                  <p className="text-gray-600 mb-4">{result.description}</p>
-
-                  <div className="flex gap-2 flex-wrap mb-4">
-                    {result.tags.map((tag) => (
+                <div key={result._id}>
+                  <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:-translate-y-1 transition-transform cursor-pointer">
+                    <h3 className="font-black text-lg mb-2">{result.title}</h3>
+                    <p
+                      className="text-gray-600 mb-4"
+                      dangerouslySetInnerHTML={{
+                        __html:
+                          result.description.length > 500
+                            ? result.description?.substring(0, 150) + "..."
+                            : result.description,
+                      }}
+                    ></p>
+                    <div
+                      className="block mb-4 text-blue-500 font-semibold cursor-pointer"
+                      onClick={() => setDispProject(true)}
+                    >
+                      Read more ...
+                    </div>
+                    <div className="flex gap-2 flex-wrap mb-4">
+                      {result.technologies.map((tag) => (
+                        <span
+                        onClick={() =>
+                          navigate(`/user/projects/${tag.tag}`)
+                        }
+                          key={tag._id}
+                          className="px-2 py-1 bg-blue-100 border-2 border-black text-sm font-bold"
+                        >
+                          #{tag.tag}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between text-sm font-bold">
                       <span
-                        key={tag}
-                        className="px-2 py-1 bg-blue-100 border-2 border-black text-sm font-bold"
+                        onClick={() =>
+                          navigate(`/user/user_profile/${result.userId._id}`)
+                        }
+                        className="flex items-center gap-1"
                       >
-                        #{tag}
+                        <i className="ri-user-line"></i>
+                        {result.userId.username}
                       </span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm font-bold">
-                    <span className="flex items-center gap-1">
-                      <i className="ri-user-line"></i>
-                      {result.author}
-                    </span>
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1">
-                        <i className="ri-heart-line"></i>
-                        {result.likes}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <i className="ri-chat-1-line"></i>
-                        {result.comments}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleLike(result._id)}
+                          className="flex items-center gap-1 transition-colors"
+                        >
+                          <i
+                            className={`${
+                              result.likes.includes(user._id)
+                                ? "ri-heart-fill text-red-500"
+                                : "ri-heart-line"
+                            }`}
+                          />
+                          <span className="text-sm">{result.likes.length}</span>
+                        </button>
+                        <span className="flex items-center gap-1">
+                          <i className="ri-chat-1-line"></i>
+                          {/* {result.comments} */}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  {dispProject && (
+                    <DetailedProject
+                      title={result.title}
+                      userImage={result.userId.avatar}
+                      Name={result.userId.name}
+                      username={result.userId.username}
+                      setDispProject={setDispProject}
+                      description={result.description}
+                      githublink={result.githubRepo}
+                      demoUrl={result?.demoUrl || ""}
+                      projectTechnologies={result.technologies}
+                    />
+                  )}
                 </div>
               ))}
             </div>

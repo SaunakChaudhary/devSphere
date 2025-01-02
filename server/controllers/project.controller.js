@@ -100,7 +100,7 @@ const deleteProject = async (req, res) => {
   try {
     const { id } = req.body;
     if (!id) return res.status(400).json({ message: "Id is required" });
-    await projectModel.findOneAndDelete(id);
+    await projectModel.findByIdAndDelete(id);
     return res.status(200).json({ message: "Project Deleted" });
   } catch (error) {
     return res.status(500).json({ message: "SERVER ERROR : " + error });
@@ -153,6 +153,18 @@ const editProject = async (req, res) => {
       }
     }
 
+    for (const techId of technologies) {
+      const hashtags = await hashtagModel.findById(techId);
+      
+      if (!mentionedUser.technologies.includes(hashtags._id)) {
+        await hashtagModel.findByIdAndUpdate(
+          techId,
+          { $inc: { count: 1 } },
+          { new: true }
+        );
+      }
+    }
+
     const updProject = await projectModel.findByIdAndUpdate(
       projectId,
       {
@@ -166,6 +178,7 @@ const editProject = async (req, res) => {
       },
       { new: true }
     );
+
     return res
       .status(200)
       .json({ message: "Project Updated", project: updProject });

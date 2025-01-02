@@ -7,10 +7,11 @@ import toast from "react-hot-toast";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import SyncLoader from "react-spinners/SyncLoader";
+import { useNavigate } from "react-router-dom";
 
 const ProjectSubmission = () => {
   const [isLoading, setIsLoading] = useState(false);
-
+  const navigate = useNavigate();
   const { user } = useContext(UserDataContext);
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
@@ -171,13 +172,7 @@ const ProjectSubmission = () => {
 
       if (response.ok) {
         toast.success(data.message);
-        setTechnologies([]);
-        setFormData({
-          title: "",
-          githubRepo: "",
-          description: "",
-          demoUrl: "",
-        });
+        navigate("/user/profile");
       } else {
         toast.error(data.message);
       }

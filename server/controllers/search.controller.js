@@ -1,5 +1,7 @@
 const UserModel = require("../models/user.model");
+const ProjectModel = require("../models/project.model");
 const HashtagModel = require("../models/hashtag.model");
+
 const { default: mongoose } = require("mongoose");
 
 const getSearchResults = async (req, res) => {
@@ -12,7 +14,21 @@ const getSearchResults = async (req, res) => {
         { name: { $regex: search, $options: "i" } },
       ],
     });
-    return res.status(200).json({ users, message: "Message Sent" });
+
+    const hashtags = await HashtagModel.find({
+      $or: [{ tag: { $regex: search, $options: "i" } }],
+    });
+
+    const projects = await ProjectModel.find({
+      $or: [
+        { title: { $regex: search, $options: "i" } },
+        { technologies: { $in: hashtags.map((hashtag) => hashtag._id) } },
+      ],
+    })
+      .populate("technologies")
+      .populate("userId");
+
+    return res.status(200).json({ users, projects, message: "Message Sent" });
   } catch (error) {
     return res.status(500).json("SERVER ERROR : " + error);
   }
@@ -39,14 +55,13 @@ const searchedUser = async (req, res) => {
   }
 };
 
-
 const redirectUser = async (req, res) => {
   const { username } = req.params;
   try {
     if (!username) {
       return res.status(400).json({ message: "Username required" });
     }
-    const userData = await UserModel.findOne({username});
+    const userData = await UserModel.findOne({ username });
     if (userData) {
       return res.status(200).json({ userData });
     }
@@ -56,4 +71,4 @@ const redirectUser = async (req, res) => {
   }
 };
 
-module.exports = { getSearchResults, searchedUser ,redirectUser };
+module.exports = { getSearchResults, searchedUser, redirectUser };

@@ -203,7 +203,7 @@ const UpdProject = ({
       >
         ✕
       </button>
-      <div className="min-h-screen py-12 px-4">
+      <div className="min-h-screen mb-20 py-12 px-4">
         <div className="w-full max-w-4xl bg-white border-4 border-black p-4 md:p-8 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mx-auto">
           {/* User Info */}
           <div className="flex items-center gap-3 mb-4">

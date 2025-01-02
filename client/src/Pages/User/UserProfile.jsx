@@ -2,7 +2,7 @@ import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 import "remixicon/fonts/remixicon.css";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { UserDataContext } from "../../Context/UserContext";
 import SyncLoader from "react-spinners/SyncLoader";
@@ -23,7 +23,7 @@ const UserProfile = () => {
   const { id } = useParams();
   const [userDetails, setuserDetails] = useState([]);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchUserDetails = async () => {
       try {
         setLoading(true);
@@ -87,7 +87,7 @@ useEffect(() => {
         fetchData();
       });
     }
-  }, [API_BASE_URL, id, user._id, updateState1, socket ]);
+  }, [API_BASE_URL, id, user._id, updateState1, socket]);
 
   const handleFollow = async () => {
     setLoading(true);
@@ -146,7 +146,7 @@ useEffect(() => {
     } else {
       fetchProjects();
     }
-  }, [API_BASE_URL, id, navigate,updateState1]);
+  }, [API_BASE_URL, id, navigate, updateState1]);
 
   const handleLike = async (projectId) => {
     try {
@@ -165,6 +165,17 @@ useEffect(() => {
       }
     } catch (error) {
       toast.error(error.message);
+    }
+  };
+
+  const targetDivRef = useRef(null);
+
+  const handleScrollToDiv = () => {
+    if (targetDivRef.current) {
+      targetDivRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
 
@@ -306,7 +317,10 @@ useEffect(() => {
                       <p className="text-gray-700 font-bold">Following</p>
                     </div>
                   </div>
-                  <div className="bg-green-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+                  <div
+                    onClick={handleScrollToDiv}
+                    className="bg-green-100 p-4 border-4 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
+                  >
                     <div className="text-center">
                       <p className="text-2xl font-black">{count}</p>
                       <p className="text-gray-700 font-bold">Projects</p>
@@ -328,8 +342,11 @@ useEffect(() => {
                       userDetails.interest &&
                       userDetails.interest.map((interest, index) => (
                         <span
+                          onClick={() =>
+                            navigate(`/user/projects/${interest.tag}`)
+                          }
                           key={index}
-                          className={`
+                          className={`cursor-pointer
                         ${interest.type === "languages" && "bg-green-200"}
                         ${interest.type === "frontend" && "bg-purple-200"}
                         ${interest.type === "backend" && "bg-orange-200"}
@@ -380,7 +397,13 @@ useEffect(() => {
               </div>
 
               {/* Projects Section */}
-              <div className="bg-white border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 md:p-8 mb-20">
+              <div
+                ref={targetDivRef}
+                style={{
+                  padding: "20px",
+                }}
+                className="bg-white border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 md:p-8 mb-20"
+              >
                 <h2 className="text-2xl font-bold mb-4">Projects</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   {projects.length === 0
@@ -431,8 +454,11 @@ useEffect(() => {
                             <div className="flex flex-wrap gap-2 mb-4">
                               {project.technologies.map((tech, techIndex) => (
                                 <span
+                                  onClick={() =>
+                                    navigate(`/user/projects/${tech.tag}`)
+                                  }
                                   key={techIndex}
-                                  className="bg-gray-100 px-2 py-1 text-sm font-bold border-2 border-black"
+                                  className="cursor-pointer bg-gray-100 px-2 py-1 text-sm font-bold border-2 border-black"
                                 >
                                   #{tech.tag}
                                 </span>
