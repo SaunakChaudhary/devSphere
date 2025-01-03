@@ -21,8 +21,16 @@ const ProjectsHashtag = () => {
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
 
-  const [dispProject, setDispProject] = useState(false);
   const [checkLiked, setCheckLiked] = useState(false);
+  const [dispProject, setDispProject] = useState([]);
+
+  const handleDispProject = (index) => {
+    setDispProject((prevDispProject) => {
+      const newDispProject = [...prevDispProject];
+      newDispProject[index] = !newDispProject[index];
+      return newDispProject;
+    });
+  };
 
   useEffect(() => {
     const searchData = async () => {
@@ -91,7 +99,7 @@ const ProjectsHashtag = () => {
 
           {searchResults.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {searchResults.map((result) => (
+              {searchResults.map((result, index) => (
                 <div key={result._id}>
                   <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:-translate-y-1 transition-transform cursor-pointer">
                     <h3 className="font-black text-lg mb-2">{result.title}</h3>
@@ -106,7 +114,7 @@ const ProjectsHashtag = () => {
                     ></p>
                     <div
                       className="block mb-4 text-blue-500 font-semibold cursor-pointer"
-                      onClick={() => setDispProject(true)}
+                      onClick={() => handleDispProject(index)}
                     >
                       Read more ...
                     </div>
@@ -147,7 +155,7 @@ const ProjectsHashtag = () => {
                       </div>
                     </div>
                   </div>
-                  {dispProject && (
+                  {dispProject[index] && (
                     <DetailedProject
                       title={result.title}
                       userImage={result.userId.avatar}
@@ -158,6 +166,7 @@ const ProjectsHashtag = () => {
                       githublink={result.githubRepo}
                       demoUrl={result?.demoUrl || ""}
                       projectTechnologies={result.technologies}
+                      index={index}
                     />
                   )}
                 </div>
