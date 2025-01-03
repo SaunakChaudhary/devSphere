@@ -52,7 +52,15 @@ const Search = () => {
   }, [API_BASE_URL, searchQuery, checkLiked]);
 
   const [popularTags, setPopularTags] = useState([]);
-  const [dispProject, setDispProject] = useState(false);
+  const [dispProject, setDispProject] = useState([]);
+
+  const handleDispProject = (index) => {
+    setDispProject((prevDispProject) => {
+      const newDispProject = [...prevDispProject];
+      newDispProject[index] = !newDispProject[index];
+      return newDispProject;
+    });
+  };
 
   const handleLike = async (projectId) => {
     try {
@@ -175,7 +183,7 @@ const Search = () => {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {searchResults.map((result) => (
+              {searchResults.map((result, index) => (
                 <div key={result._id}>
                   <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:-translate-y-1 transition-transform cursor-pointer">
                     <h3 className="font-black text-lg mb-2">{result.title}</h3>
@@ -190,16 +198,14 @@ const Search = () => {
                     ></p>
                     <div
                       className="block mb-4 text-blue-500 font-semibold cursor-pointer"
-                      onClick={() => setDispProject(true)}
+                      onClick={() => handleDispProject(index)}
                     >
                       Read more ...
                     </div>
                     <div className="flex gap-2 flex-wrap mb-4">
                       {result.technologies.map((tag) => (
                         <span
-                        onClick={() =>
-                          navigate(`/user/projects/${tag.tag}`)
-                        }
+                          onClick={() => navigate(`/user/projects/${tag.tag}`)}
                           key={tag._id}
                           className="px-2 py-1 bg-blue-100 border-2 border-black text-sm font-bold"
                         >
@@ -231,14 +237,10 @@ const Search = () => {
                           />
                           <span className="text-sm">{result.likes.length}</span>
                         </button>
-                        <span className="flex items-center gap-1">
-                          <i className="ri-chat-1-line"></i>
-                          {/* {result.comments} */}
-                        </span>
                       </div>
                     </div>
                   </div>
-                  {dispProject && (
+                  {dispProject[index] && (
                     <DetailedProject
                       title={result.title}
                       userImage={result.userId.avatar}
@@ -249,6 +251,7 @@ const Search = () => {
                       githublink={result.githubRepo}
                       demoUrl={result?.demoUrl || ""}
                       projectTechnologies={result.technologies}
+                      index={index}
                     />
                   )}
                 </div>

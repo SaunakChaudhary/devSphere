@@ -46,6 +46,12 @@ const projectSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  comment: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,

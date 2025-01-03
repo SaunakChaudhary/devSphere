@@ -11,11 +11,18 @@ const DetailedProject = ({
   githublink,
   demoUrl,
   projectTechnologies,
+  index
 }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-45 overflow-y-auto">
+    <div className="fixed z-50 inset-0 bg-black bg-opacity-45 overflow-y-auto">
       <button
-        onClick={() => setDispProject(false)}
+        onClick={() =>
+          setDispProject((prevDispProject) => {
+            const newDispProject = [...prevDispProject];
+            newDispProject[index] = !newDispProject[index];
+            return newDispProject;
+          })
+        }
         className="absolute top-2 right-2 text-white w-12 h-12 transition-all hover:-translate-y-0.5 active:translate-y-0 active:shadow-none font-bold text-2xl"
         aria-label="Close"
       >
@@ -33,7 +40,9 @@ const DetailedProject = ({
             />
             <div>
               <h3 className="font-bold md:text-2xl">{Name}</h3>
-              <h5 className="text-gray-500 text-xs md:text-base">@{username}</h5>
+              <h5 className="text-gray-500 text-xs md:text-base">
+                @{username}
+              </h5>
             </div>
           </div>
 
@@ -42,7 +51,7 @@ const DetailedProject = ({
           {/* Project Details */}
           <div className="bg-yellow-50 border-4 border-black p-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mb-6">
             <h4 className="text-xl md:text-2xl font-black mb-4">{title}</h4>
-            <div 
+            <div
               className="text-gray-700 prose max-w-none mb-4"
               dangerouslySetInnerHTML={{
                 __html: description,
@@ -54,8 +63,8 @@ const DetailedProject = ({
           <div className="space-y-4 mb-6">
             <div className="bg-blue-100 border-4 border-black p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               <p className="font-bold text-lg mb-2">GitHub Repository:</p>
-              <NavLink 
-                to={githublink} 
+              <NavLink
+                to={githublink}
                 className="text-blue-600 hover:text-blue-800 underline font-semibold break-all"
               >
                 {githublink}
@@ -65,8 +74,8 @@ const DetailedProject = ({
             {demoUrl && (
               <div className="bg-green-100 border-4 border-black p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 <p className="font-bold text-lg mb-2">Live Demo:</p>
-                <NavLink 
-                  to={demoUrl} 
+                <NavLink
+                  to={demoUrl}
                   className="text-blue-600 hover:text-blue-800 underline font-semibold break-all"
                 >
                   {demoUrl}

@@ -144,10 +144,6 @@ const ProjectsHashtag = () => {
                           />
                           <span className="text-sm">{result.likes.length}</span>
                         </button>
-                        <span className="flex items-center gap-1">
-                          <i className="ri-chat-1-line"></i>
-                          {/* {result.comments} */}
-                        </span>
                       </div>
                     </div>
                   </div>

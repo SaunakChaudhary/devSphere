@@ -11,6 +11,7 @@ const userRouter = require("./routes/user.routes");
 const searchRouter = require("./routes/search.routes");
 const NotificationRouter = require("./routes/notification.routes");
 const ProjectRouter = require("./routes/project.routes");
+const CommentRouter = require("./routes/comment.routes");
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -41,6 +42,7 @@ app.use("/user", userRouter);
 app.use("/search", searchRouter);
 app.use("/notification", NotificationRouter);
 app.use("/project", ProjectRouter);
+app.use("/comment", CommentRouter);
 
 DB()
   .then(() => {

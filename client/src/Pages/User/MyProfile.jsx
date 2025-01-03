@@ -9,12 +9,12 @@ import SyncLoader from "react-spinners/SyncLoader";
 import { SocketContext } from "../../Context/SocketContext";
 import DetailedProject from "../../Components/DetailedProject";
 import UpdProject from "../../Components/UpdProject";
+import CommentSection from "../../Components/CommentComponent";
 
 const MyProfile = () => {
   const { socket } = useContext(SocketContext);
 
   const [delteUp, setDeleteUp] = useState(false);
-  const [dispProject, setDispProject] = useState(false);
   const [updProject, setUpdProject] = useState(false);
   const navigate = useNavigate();
   const [showFullBio, setShowFullBio] = useState(false);
@@ -182,7 +182,29 @@ const MyProfile = () => {
       });
     }
   };
+  const [edit1, setEdit1] = useState([]);
+  const [dispProject, setDispProject] = useState([]);
 
+  const handleDispProject = (index) => {
+    setDispProject((prevDispProject) => {
+      const newDispProject = [...prevDispProject];
+      newDispProject[index] = !newDispProject[index];
+      return newDispProject;
+    });
+  };
+
+  const handleComment = (projectId,index) => {
+    setEdit1((prevEdit) => {
+      const newEdit = [...prevEdit];
+      newEdit.fill(false);
+      if (newEdit[index] === undefined) {
+        newEdit[index] = true;
+      } else {
+        newEdit[index] = !newEdit[index];
+      }
+      return newEdit;
+    });
+  };
   return (
     <div className="bg-yellow-50 min-h-screen">
       {isLoading && (
@@ -466,7 +488,7 @@ const MyProfile = () => {
                             ></p>
                             <div
                               className="block mb-4 text-blue-500 font-semibold cursor-pointer"
-                              onClick={() => setDispProject(true)}
+                              onClick={() => handleDispProject(index)}
                             >
                               Read more ...
                             </div>
@@ -499,13 +521,23 @@ const MyProfile = () => {
                                   {project.likes.length}
                                 </span>
                               </button>
-                              <span className="flex items-center gap-1">
-                                <i className="ri-chat-1-line"></i>
-                                {/* {project.comments} */}
-                              </span>
+                              <button
+                                onClick={() => handleComment(project._id,index)}
+                                className="flex items-center gap-1 transition-colors"
+                              >
+                                <span className="flex items-center gap-1">
+                                  <i className="ri-chat-1-line"></i>
+                                  <span className="text-sm">
+                                    {project.comment.length}
+                                  </span>
+                                </span>
+                              </button>
                             </div>
                           </div>
-                          {dispProject && (
+                          {edit1[index]  && (
+                            <CommentSection projectId={project._id} />
+                          )}
+                          {dispProject[index] && (
                             <DetailedProject
                               title={project.title}
                               userImage={project.userId.avatar}
@@ -516,6 +548,7 @@ const MyProfile = () => {
                               githublink={project.githubRepo}
                               demoUrl={project?.demoUrl || ""}
                               projectTechnologies={project.technologies}
+                              index={index}
                             />
                           )}
 

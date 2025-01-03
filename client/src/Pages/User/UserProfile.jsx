@@ -8,6 +8,7 @@ import { UserDataContext } from "../../Context/UserContext";
 import SyncLoader from "react-spinners/SyncLoader";
 import { SocketContext } from "../../Context/SocketContext";
 import DetailedProject from "../../Components/DetailedProject";
+import CommentSection from "../../Components/CommentComponent";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -120,7 +121,15 @@ const UserProfile = () => {
 
   const [projects, setProjects] = useState([]);
   const [count, setCount] = useState(0);
-  const [dispProject, setDispProject] = useState(false);
+  const [dispProject, setDispProject] = useState([]);
+
+  const handleDispProject = (index) => {
+    setDispProject((prevDispProject) => {
+      const newDispProject = [...prevDispProject];
+      newDispProject[index] = !newDispProject[index];
+      return newDispProject;
+    });
+  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -177,6 +186,21 @@ const UserProfile = () => {
         block: "start",
       });
     }
+  };
+
+  const [edit, setEdit] = useState([]);
+
+  const handleComment = (index) => {
+    setEdit((prevEdit) => {
+      const newEdit = [...prevEdit];
+      newEdit.fill(false);
+      if (newEdit[index] === undefined) {
+        newEdit[index] = true;
+      } else {
+        newEdit[index] = !newEdit[index];
+      }
+      return newEdit;
+    });
   };
 
   return (
@@ -447,7 +471,7 @@ const UserProfile = () => {
                             ></p>
                             <div
                               className="block mb-4 text-blue-500 font-semibold cursor-pointer"
-                              onClick={() => setDispProject(true)}
+                              onClick={() => handleDispProject(index)}
                             >
                               Read more ...
                             </div>
@@ -480,19 +504,32 @@ const UserProfile = () => {
                                   {project.likes.length}
                                 </span>
                               </button>
-                              <span className="flex items-center gap-1">
-                                <i className="ri-chat-1-line"></i>
-                                {/* {project.comments} */}
-                              </span>
+                              <button
+                                onClick={() => handleComment(index)}
+                                className="flex items-center gap-1 transition-colors"
+                              >
+                                <span className="flex items-center gap-1">
+                                  <i className="ri-chat-1-line"></i>
+                                  <span className="text-sm">
+                                    {project.comment.length}
+                                  </span>
+                                </span>
+                              </button>
                             </div>
                           </div>
-                          {dispProject && (
+
+                          {edit[index] && (
+                            <CommentSection projectId={project._id} />
+                          )}
+
+                          {dispProject[index] && (
                             <DetailedProject
                               title={project.title}
                               userImage={project.userId.avatar}
                               Name={project.userId.name}
                               username={project.userId.username}
                               setDispProject={setDispProject}
+                              index={index}
                               description={project.description}
                               githublink={project.githubRepo}
                               demoUrl={project?.demoUrl || ""}
