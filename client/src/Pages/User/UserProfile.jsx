@@ -193,11 +193,12 @@ const UserProfile = () => {
   const handleComment = (index) => {
     setEdit((prevEdit) => {
       const newEdit = [...prevEdit];
+      const ch = newEdit[index];
       newEdit.fill(false);
       if (newEdit[index] === undefined) {
         newEdit[index] = true;
       } else {
-        newEdit[index] = !newEdit[index];
+        newEdit[index] = !ch;
       }
       return newEdit;
     });
