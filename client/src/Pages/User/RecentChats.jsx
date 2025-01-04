@@ -110,7 +110,7 @@ const RecentChats = () => {
                           <img
                             src={chat.avatar}
                             alt={chat.name}
-                            className="w-12 h-12 md:w-16 md:h-16 border-2 rounded-lg  border-black rounded-full"
+                            className="w-12 h-12 md:w-16 md:h-16 border-2 border-black rounded-full"
                           />
                           <div>
                             <h3 className="text-lg md:text-xl font-black mb-1">
