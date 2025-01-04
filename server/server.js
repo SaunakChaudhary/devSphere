@@ -12,6 +12,7 @@ const searchRouter = require("./routes/search.routes");
 const NotificationRouter = require("./routes/notification.routes");
 const ProjectRouter = require("./routes/project.routes");
 const CommentRouter = require("./routes/comment.routes");
+const MessageRouter = require("./routes/message.routes");
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -43,6 +44,7 @@ app.use("/search", searchRouter);
 app.use("/notification", NotificationRouter);
 app.use("/project", ProjectRouter);
 app.use("/comment", CommentRouter);
+app.use("/message", MessageRouter);
 
 DB()
   .then(() => {

@@ -21,6 +21,9 @@ import MyProfile from "./Pages/User/MyProfile";
 import Notifications from "./Pages/User/Notification";
 import Redirect from "./Pages/User/Redirect";
 import ProjectsHashtag from "./Pages/User/ProjectsHashtag";
+import ChatPage from "./Pages/User/ChatPage";
+import RecentChats from "./Pages/User/RecentChats";
+import UserSettings from "./Pages/User/UserSettings";
 
 const App = () => {
   return (
@@ -149,6 +152,30 @@ const App = () => {
         element={
           <UserProtected>
             <ProjectsHashtag />
+          </UserProtected>
+        }
+      />{" "}
+      <Route
+        path="/user/chat"
+        element={
+          <UserProtected>
+            <RecentChats />
+          </UserProtected>
+        }
+      />{" "}
+      <Route
+        path="/user/userChat/:id"
+        element={
+          <UserProtected>
+            <ChatPage />
+          </UserProtected>
+        }
+      />{" "}
+      <Route
+        path="/user/settings"
+        element={
+          <UserProtected>
+            <UserSettings />
           </UserProtected>
         }
       />{" "}

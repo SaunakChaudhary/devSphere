@@ -84,7 +84,7 @@ const UserNavbar = ({ page }) => {
     <div>
       {/* Navbar */}
       <div className="p-4">
-        <nav className="bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] py-4 px-6 border-4 border-black flex justify-between items-center">
+        <nav className="bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] py-4 px-6 border-2  border-black flex justify-between items-center">
           <h1 className="flex items-center text-2xl font-black text-black">
             <i className="mr-2 ri-terminal-window-line text-3xl"></i>
             <span>DevSphere</span>
@@ -126,8 +126,8 @@ const UserNavbar = ({ page }) => {
                 <i className="mr-3 ri-notification-badge-fill text-2xl active:text-red-700 text-red-500"></i>
               )}
             </NavLink>
-            <NavLink to="/logout" className="text-black font-bold">
-              <i className="ri-logout-box-r-line text-2xl active:text-red-500"></i>
+            <NavLink to="/user/chat" className="text-black font-bold">
+              <i className="ri-chat-smile-3-line text-2xl active:text-red-500"></i>
             </NavLink>
           </div>
         </nav>

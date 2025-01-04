@@ -193,7 +193,7 @@ const MyProfile = () => {
     });
   };
 
-  const handleComment = (projectId,index) => {
+  const handleComment = (projectId, index) => {
     setEdit1((prevEdit) => {
       const newEdit = [...prevEdit];
       const ch = newEdit[index];
@@ -256,7 +256,8 @@ const MyProfile = () => {
               <div className="bg-white border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 md:p-8 mb-6">
                 <div className=" flex flex-col md:flex-row items-center gap-6 mb-8">
                   {/* Profile Picture */}
-                  <div className="relative">
+                  <div className="relative flex">
+                    {/* Profile Picture */}
                     <div className="w-32 h-32 md:w-40 md:h-40 border-4 border-black overflow-hidden rounded-full">
                       <img
                         src={userDetails?.avatar}
@@ -304,6 +305,12 @@ const MyProfile = () => {
                         className="bg-blue-300 text-black font-bold py-2 px-6 border-2 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-blue-400 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
                       >
                         <i className="ri-user-settings-fill"></i> Edit Profile
+                      </button>{" "}
+                      <button
+                        onClick={() => navigate("/user/settings")}
+                        className="bg-gray-300 text-black font-bold py-2 px-6 border-2 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-blue-400 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                      >
+                        <i className="ri-settings-line"></i> Settings
                       </button>
                     </div>
                   </div>
@@ -523,7 +530,9 @@ const MyProfile = () => {
                                 </span>
                               </button>
                               <button
-                                onClick={() => handleComment(project._id,index)}
+                                onClick={() =>
+                                  handleComment(project._id, index)
+                                }
                                 className="flex items-center gap-1 transition-colors"
                               >
                                 <span className="flex items-center gap-1">
@@ -535,7 +544,7 @@ const MyProfile = () => {
                               </button>
                             </div>
                           </div>
-                          {edit1[index]  && (
+                          {edit1[index] && (
                             <CommentSection projectId={project._id} />
                           )}
                           {dispProject[index] && (

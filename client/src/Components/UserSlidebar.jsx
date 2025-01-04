@@ -2,11 +2,10 @@ import { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { UserDataContext } from "../Context/UserContext";
 
-
 const UserSlidebar = () => {
-  const {user} = useContext(UserDataContext);
+  const { user } = useContext(UserDataContext);
   return (
-    <aside className="hidden sm:block bg-white w-full h-screen md:w-64 p-6 border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+    <aside className="hidden sm:block bg-white w-full h-max md:w-64 p-6 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
       {/* User Info */}
       <div className="flex flex-col items-center mb-6">
         <div className="w-20 h-20 bg-gray-200 rounded-full border-4 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
@@ -17,7 +16,9 @@ const UserSlidebar = () => {
           />
         </div>
         <p
-          className={`mt-4 text-lg font-bold text-black text-center ${user.name.length > 20 ? "text-sm" : ""}`}
+          className={`mt-4 text-lg font-bold text-black text-center ${
+            user.name.length > 20 ? "text-sm" : ""
+          }`}
           title={user.name}
         >
           {user.name}
@@ -37,6 +38,12 @@ const UserSlidebar = () => {
           className="flex items-center gap-2 text-lg font-medium text-black hover:bg-blue-100 active:translate-x-1 p-3 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
         >
           <i className="ri-pencil-line"></i> Upload Projects
+        </NavLink>
+        <NavLink
+          to="/user/chat"
+          className="flex items-center gap-2 text-lg font-medium text-black hover:bg-blue-100 active:translate-x-1 p-3 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+        >
+          <i className="ri-messenger-line"></i> Messages
         </NavLink>
         <NavLink
           to="/user/search"
