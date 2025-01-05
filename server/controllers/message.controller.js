@@ -28,7 +28,7 @@ const sendMessage = async (req, res) => {
 
     await Promise.all([conversation.save(), newMessage.save()]);
 
-    const populatedUser = await UserModel.findById(receiverId);
+    const populatedUser = await UserModel.findById(senderId);
     // socket io functionality
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
@@ -155,10 +155,36 @@ const clearMsg = async (req, res) => {
   }
 };
 
+const recentChats = async (req, res) => {
+  try {
+    const { senderId } = req.params;
+    let conversations = await messageModel
+      .find({ senderId })
+      .populate("receiverId") 
+      .sort({ updatedAt: -1 });
+
+    // Remove duplicate conversations based on `_id`
+    const uniqueConversations = Array.from(
+      new Map(
+        conversations.map((conv) => [conv.receiverId._id.toString(), conv])
+      ).values()
+    );
+
+    // Respond with the unique conversations
+    return res.status(200).json({
+      message: "Conversations retrieved successfully",
+      conversations: uniqueConversations,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR : " + error });
+  }
+};
+
 module.exports = {
   clearMsg,
   sendMessage,
   SearchUserExceptLoggedInUser,
   getMessage,
   deleteMessage,
+  recentChats,
 };
