@@ -53,6 +53,70 @@ const UserChatPage = () => {
   const [newMessage, setNewMessage] = useState("");
 
   useEffect(() => {
+    if (socket) {
+      const handleNewMessage = (newMessage) => {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      };
+
+      socket.on("sendMsg", handleNewMessage);
+
+      return () => socket.off("sendMsg", handleNewMessage);
+    }
+  }, [socket]);
+
+  const handleSendMessage = async () => {
+    try {
+      if (newMessage.trim()) {
+        setMessages([
+          ...messages,
+          {
+            senderId: user._id,
+            receiverId: id,
+            message: newMessage,
+            createdAt: new Date(),
+          },
+        ]);
+        setNewMessage("");
+      }
+      const response = await fetch(`${API_BASE_URL}/message/sendMessage`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: newMessage,
+          senderId: user._id,
+          receiverId: id,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error);
+    }
+  };
+
+  const chatContainerRef = useRef(null);
+
+  useEffect(() => {
+    // Scroll to the bottom of the chat container when messages change
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const [longPressMessage, setLongPressMessage] = useState(null);
+
+  const handleLongPress = (messageId) => {
+    setLongPressMessage(messageId);
+  };
+
+  useEffect(() => {
     const getMessages = async () => {
       try {
         const response = await fetch(
@@ -70,46 +134,20 @@ const UserChatPage = () => {
       }
     };
     if (user._id && id) getMessages();
-  }, [API_BASE_URL, id, user._id]);
+  }, [API_BASE_URL, id, user._id, longPressMessage]);
 
-  useEffect(() => {
-    if (socket) {
-      const handleNewMessage = (newMessage) => {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      };
-
-      socket.on("sendMsg", handleNewMessage);
-
-      return () => socket.off("sendMsg", handleNewMessage);
-    }
-  }, [socket]);
-
-  const handleSendMessage = async () => {
+  const handleDelete = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/message/sendMessage`, {
-        method: "POST",
+      const response = await fetch(`${API_BASE_URL}/message/DeleteMessage`, {
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          message: newMessage,
-          senderId: user._id,
-          receiverId: id,
-        }),
+        body: JSON.stringify({ messageId: longPressMessage }),
       });
       const data = await response.json();
       if (response.ok) {
-        if (newMessage.trim()) {
-          setMessages([
-            ...messages,
-            {
-              senderId: user._id,
-              receiverId: id,
-              message: newMessage,
-            },
-          ]);
-          setNewMessage("");
-        }
+        setLongPressMessage(null);
       } else {
         toast.error(data.message);
       }
@@ -118,15 +156,6 @@ const UserChatPage = () => {
     }
   };
 
-  const chatContainerRef = useRef(null); // Reference for the chat container
-
-  useEffect(() => {
-    // Scroll to the bottom of the chat container when messages change
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
   return (
     <div className="bg-yellow-50 flex flex-col">
       {loading && (
@@ -159,23 +188,53 @@ const UserChatPage = () => {
                   Last seen 11:02 PM
                 </div>
               </div>
+              {longPressMessage && (
+                <div className="absolute right-6" onClick={handleDelete}>
+                  <i className="ri-delete-bin-line text-red-500 text-2xl"></i>
+                </div>
+              )}
             </h2>
 
             {/* chat section */}
             <div
               ref={chatContainerRef}
               className="flex-grow sm:border-2 border-black overflow-y-auto mb-20 p-4 w-full bg-[#fbfbfb] mt-20 sm:max-w-[1220px] sm:mb-40"
+              onClick={() => setLongPressMessage(null)}
             >
               {messages.map((message, idx) => (
                 <div
                   key={idx}
-                  className={`flex items-start mb-4 ${
-                    message.senderId === user._id ? "justify-end" : ""
-                  }`}
+                  className={`flex items-start mb-4 relative ${
+                    message.senderId === user._id
+                      ? `justify-end  ${
+                          longPressMessage === message._id &&
+                          "bg-green-200 z-50"
+                        }`
+                      : longPressMessage === message._id && "bg-green-200"
+                  } `}
+                  onTouchStart={(e) => {
+                    const timer = setTimeout(
+                      () => handleLongPress(message._id),
+                      500
+                    );
+                    e.target.addEventListener(
+                      "touchend",
+                      () => clearTimeout(timer),
+                      {
+                        once: true,
+                      }
+                    );
+                  }}
                 >
                   <div
                     className={`p-3 max-w-48 sm:max-w-96 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-black ${
-                      message.senderId === user._id ? "bg-blue-100" : "bg-white"
+                      message.senderId === user._id
+                        ? longPressMessage === message._id
+                          ? "bg-green-200"
+                          : "bg-blue-100"
+                        : longPressMessage === message._id
+                        ? "bg-green-200"
+                        : "bg-white"
                     }`}
                     style={{
                       wordBreak: "break-word", // Ensures long words break to the next line

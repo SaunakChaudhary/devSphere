@@ -1,7 +1,7 @@
 const conversationModel = require("../models/conversation.model");
 const messageModel = require("../models/message.model");
 const UserModel = require("../models/user.model");
-const { getReceiverSocketId , io} = require("../Socket/socket");
+const { getReceiverSocketId, io } = require("../Socket/socket");
 
 const sendMessage = async (req, res) => {
   try {
@@ -53,7 +53,7 @@ const getMessage = async (req, res) => {
       })
       .populate("messages");
     if (!conversation) {
-      return res.status(200).json({messages:[]});
+      return res.status(200).json({ messages: [] });
     }
 
     return res.status(200).json({
@@ -85,4 +85,17 @@ const SearchUserExceptLoggedInUser = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage, SearchUserExceptLoggedInUser, getMessage };
+const deleteMessage = async (req, res) => {
+  const { messageId } = req.body;
+  try {
+    if (!messageId) {
+      return res.status(400).json({ message: "MessageId Not Provided" });
+    }
+    const dltMessage = await messageModel.findByIdAndDelete(messageId);
+    return res.status(200).json({ message: "Message Deleted" });
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR " + error });
+  }
+};
+
+module.exports = { sendMessage, SearchUserExceptLoggedInUser, getMessage ,deleteMessage };
