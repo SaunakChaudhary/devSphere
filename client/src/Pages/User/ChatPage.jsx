@@ -77,6 +77,8 @@ const UserChatPage = () => {
 
   const handleSendMessage = async () => {
     try {
+      const msg = newMessage;
+      setNewMessage("");
       const response = await fetch(`${API_BASE_URL}/message/sendMessage`, {
         method: "POST",
         headers: {
@@ -97,7 +99,7 @@ const UserChatPage = () => {
               _id: data.newMessage._id,
               senderId: user._id,
               receiverId: id,
-              message: newMessage,
+              message: msg,
               createdAt: new Date(),
             },
           ]);
@@ -231,13 +233,13 @@ const UserChatPage = () => {
                 <p className="font-bold text-sm">{userDetails.name}</p>
                 <div className="font-semibold flex items-center text-xs text-[#727272]">
                   {onlineUsers && onlineUsers.includes(userDetails._id) ? (
-                  <span className="p-1 rounded-full bg-green-600 mr-2"></span>
+                    <span className="p-1 rounded-full bg-green-600 mr-2"></span>
                   ) : (
                     <i className="ri-time-line text-xs mr-2" />
                   )}
                   {onlineUsers && onlineUsers.includes(userDetails._id)
                     ? "Online"
-                    : `Last seen 11:02 PM`} 
+                    : `Last seen 11:02 PM`}
                 </div>
               </div>
               {longPressMessage ? (
@@ -295,7 +297,7 @@ const UserChatPage = () => {
                   }}
                 >
                   <div
-                    className={`p-3 max-w-48 sm:max-w-96 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-black ${
+                    className={`p-3 sm:max-w-96 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-black ${
                       message.senderId === user._id
                         ? longPressMessage === message._id
                           ? "bg-green-200"
@@ -309,20 +311,16 @@ const UserChatPage = () => {
                       overflowWrap: "break-word", // Provides additional support for wrapping
                     }}
                   >
-                    <p className="font-bold text-xs mb-1">
-                      {message.senderId === user._id ? "You" : userDetails.name}{" "}
-                      <span className="text-gray-500 font-normal text-[10px]">
-                        {new Date(message.createdAt).toLocaleTimeString(
-                          "en-US",
-                          {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                          }
-                        )}
-                      </span>
-                    </p>
-                    <p className="text-xs">{message.message}</p>
+                    <div className="text-base">
+                      <div>{message.message}</div>
+                    </div>
+                    <div className="text-gray-500 font-normal text-right pt-1 text-[10px] ml-8">
+                      {new Date(message.createdAt).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -339,6 +337,7 @@ const UserChatPage = () => {
               />
               <button
                 onClick={handleSendMessage}
+                disabled={loading || newMessage.trim() === ""}
                 className="rounded-2xl bg-blue-500 text-white font-bold px-6 py-3 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-blue-600"
               >
                 <i className="ri-send-plane-fill"></i>

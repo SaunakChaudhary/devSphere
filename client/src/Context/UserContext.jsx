@@ -14,9 +14,19 @@ const UserContext = ({ children }) => {
   });
 
   const [globalHashtags, setGlobalHashtags] = useState([]);
+  const [reChats, setReChats] = useState([]);
 
   return (
-    <UserDataContext.Provider value={{ user, setUser , setGlobalHashtags , globalHashtags}}>
+    <UserDataContext.Provider
+      value={{
+        user,
+        setUser,
+        setGlobalHashtags,
+        globalHashtags,
+        setReChats,
+        reChats,
+      }}
+    >
       {children}
     </UserDataContext.Provider>
   );

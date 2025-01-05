@@ -1,17 +1,18 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 
 import { useContext, useEffect, useState } from "react";
 import { SocketContext } from "../Context/SocketContext";
 import { toast } from "react-hot-toast";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { UserDataContext } from "../Context/UserContext";
-
 const UserNavbar = ({ page, noti }) => {
+  const navigate = useNavigate();
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
-  const { user } = useContext(UserDataContext);
+  const { user, setReChats } = useContext(UserDataContext);
   const { socket } = useContext(SocketContext);
 
   const showToastNotification = (msg) => {
@@ -22,7 +23,10 @@ const UserNavbar = ({ page, noti }) => {
         } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
       >
         <div className="flex-1 w-0 p-4">
-          <div className="flex items-start">
+          <div
+            className="flex items-start"
+            onClick={() => navigate(`/user/user_profile/${msg.user._id}`)}
+          >
             <div className="flex-shrink-0 pt-0.5">
               <img
                 className="h-10 w-10 rounded-full"
@@ -33,12 +37,10 @@ const UserNavbar = ({ page, noti }) => {
             <div className="ml-3 flex-1">
               {/* Accessing the message text correctly */}
               <p className="text-sm font-medium text-gray-900">
-                {msg.user.name}
+                {msg.user.username}
               </p>
               <p className="mt-1 text-sm text-gray-500">
-                {msg.message.message.length > 20
-                  ? msg.message.message.substring(0, 20) + " ..."
-                  : msg.message.message}
+                {msg.user.name + " " + msg.message}
               </p>
             </div>
           </div>
@@ -62,7 +64,48 @@ const UserNavbar = ({ page, noti }) => {
       });
 
       socket.on("sendNotiMsg", (msg) => {
-        !noti && showToastNotification(msg);
+        !noti &&
+          toast.custom((t) => (
+            <div
+              className={`${
+                t.visible ? "animate-enter" : "animate-leave"
+              } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+            >
+              <div className="flex-1 w-0 p-4">
+                <div
+                  className="flex items-start"
+                  onClick={() => navigate(`/user/userChat/${msg.user._id}`)}
+                >
+                  <div className="flex-shrink-0 pt-0.5">
+                    <img
+                      className="h-10 w-10 rounded-full"
+                      src={msg.user.avatar}
+                      alt=""
+                    />
+                  </div>
+                  <div className="ml-3 flex-1">
+                    {/* Accessing the message text correctly */}
+                    <p className="text-sm font-medium text-gray-900">
+                      {msg.user.username}
+                    </p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {msg.message.message.length > 40
+                        ? msg.message.message.substring(0, 40)
+                        : msg.message.message}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex border-l border-gray-200">
+                <button
+                  onClick={() => toast.dismiss(t.id)}
+                  className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          ));
       });
 
       return () => {
@@ -94,6 +137,25 @@ const UserNavbar = ({ page, noti }) => {
       });
     }
   }, [API_BASE_URL, socket, user._id]);
+
+  useEffect(() => {
+    const fetchRecentChats = async () => {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/message/recentChats/${user._id}`
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setReChats(data.conversations);
+        } else {
+          toast.error(data.message);
+        }
+      } catch (error) {
+        toast.error(error);
+      }
+    };
+    if (user._id) fetchRecentChats();
+  }, [API_BASE_URL,user._id]);
 
   return (
     <div>
@@ -144,7 +206,7 @@ const UserNavbar = ({ page, noti }) => {
               )}
             </NavLink>
             <NavLink to="/user/chat" className="text-black font-bold">
-              <i className="ri-chat-smile-3-line text-2xl active:text-red-500"></i>
+              <i className="ri-message-2-line text-2xl active:text-red-500"></i>
             </NavLink>
           </div>
         </nav>
