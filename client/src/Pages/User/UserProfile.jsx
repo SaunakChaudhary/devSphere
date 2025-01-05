@@ -309,7 +309,7 @@ const UserProfile = () => {
                         <i className="ri-user-add-line mr-2"></i>
                         {updateState}
                       </button>
-                      {user._id === id && (
+                      {user._id != id && (
                         <button
                           onClick={() => navigate(`/user/userChat/${id}`)}
                           className="bg-green-300 text-black font-bold py-2 px-6 border-2 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:bg-green-400 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"

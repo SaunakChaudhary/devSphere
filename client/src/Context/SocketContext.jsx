@@ -10,8 +10,10 @@ export const SocketContext = createContext();
 
 export const SocketContextProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState(null);
   const { user } = useContext(UserDataContext);
   const isLocalhost = window.location.hostname === "localhost";
+
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
@@ -22,12 +24,15 @@ export const SocketContextProvider = ({ children }) => {
         query: { userId: user._id },
         reconnection: true,
       });
-      
+
       newSocket.on("connect_error", (err) => {
         console.error("Socket connection error:", err.message);
       });
 
       setSocket(newSocket);
+      newSocket.on("getOnlineUsers", (onlineUsers) => {
+        setOnlineUsers(onlineUsers);
+      });
 
       return () => {
         newSocket.off();
@@ -40,7 +45,7 @@ export const SocketContextProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <SocketContext.Provider value={{ socket }}>
+    <SocketContext.Provider value={{ socket,onlineUsers }}>
       {children}
     </SocketContext.Provider>
   );

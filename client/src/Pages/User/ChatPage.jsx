@@ -14,7 +14,7 @@ const UserChatPage = () => {
 
   const { id } = useParams();
   const { user } = useContext(UserDataContext);
-  const { socket } = useContext(SocketContext);
+  const { socket, onlineUsers } = useContext(SocketContext);
   const [loading, setLoading] = useState(false);
   const [userDetails, setuserDetails] = useState([]);
   const isLocalhost = window.location.hostname === "localhost";
@@ -62,8 +62,14 @@ const UserChatPage = () => {
         const msgs = messages.filter((msg) => longPressMessage != msg._id);
         setMessages(msgs);
       };
+
+      const clearChat = () => {
+        setMessages([]);
+      };
+
       socket.on("sendMsg", handleNewMessage);
       socket.on("dltMsg", deleteMessage);
+      socket.on("clrMsg", clearChat);
 
       return () => socket.off("sendMsg", handleNewMessage);
     }
@@ -170,6 +176,32 @@ const UserChatPage = () => {
     }
   };
 
+  const handleClear = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/message/clear-msg`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ senderId: user._id, receiverId: id }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message);
+        setMessages([]);
+        setMoreOption(false);
+      } else {
+        toast.error(data.message);
+      }
+      setLoading(false);
+    } catch (error) {
+      toast.error(error);
+    }
+  };
+
+  const [moreOPtion, setMoreOption] = useState(false);
+
   return (
     <div className="bg-yellow-50 flex flex-col">
       {loading && (
@@ -198,13 +230,36 @@ const UserChatPage = () => {
               <div>
                 <p className="font-bold text-sm">{userDetails.name}</p>
                 <div className="font-semibold flex items-center text-xs text-[#727272]">
-                  <i className="ri-time-line text-xs mr-2" />
-                  Last seen 11:02 PM
+                  {onlineUsers && onlineUsers.includes(userDetails._id) ? (
+                  <span className="p-1 rounded-full bg-green-600 mr-2"></span>
+                  ) : (
+                    <i className="ri-time-line text-xs mr-2" />
+                  )}
+                  {onlineUsers && onlineUsers.includes(userDetails._id)
+                    ? "Online"
+                    : `Last seen 11:02 PM`} 
                 </div>
               </div>
-              {longPressMessage && (
+              {longPressMessage ? (
                 <div className="absolute right-6" onClick={handleDelete}>
                   <i className="ri-delete-bin-line text-red-500 text-2xl"></i>
+                </div>
+              ) : (
+                <div
+                  className="absolute right-6"
+                  onClick={() => setMoreOption(!moreOPtion)}
+                >
+                  <i className="ri-more-2-line text-2xl"></i>
+                </div>
+              )}
+              {moreOPtion && (
+                <div className="bg-white w-24 absolute top-[59px] border border-black right-9">
+                  <div
+                    className="font-semibold text-base text-center"
+                    onClick={handleClear}
+                  >
+                    Clear Chat
+                  </div>
                 </div>
               )}
             </h2>
@@ -221,8 +276,7 @@ const UserChatPage = () => {
                   className={`flex items-start mb-4 relative ${
                     message.senderId === user._id
                       ? `justify-end  ${
-                          longPressMessage === message._id &&
-                          "bg-green-200"
+                          longPressMessage === message._id && "bg-green-200"
                         }`
                       : longPressMessage === message._id && "bg-green-200"
                   } `}

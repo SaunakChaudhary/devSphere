@@ -37,11 +37,11 @@ io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
 
   if (userId) {
-    // Register the socket ID for the user
     if (!userSocketMap[userId]) {
       userSocketMap[userId] = [];
     }
     userSocketMap[userId].push(socket.id);
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
   }
 
   // Handle disconnection
@@ -56,6 +56,14 @@ io.on("connection", (socket) => {
       if (userSocketMap[userId].length === 0) {
         delete userSocketMap[userId];
       }
+    }
+  });
+
+  socket.on("logout", () => {
+    if (userId && userSocketMap[userId]) {
+      // Remove the user from the socket map
+      delete userSocketMap[userId];
+      io.emit("getOnlineUsers", Object.keys(userSocketMap)); // Emit updated list of online users
     }
   });
 });

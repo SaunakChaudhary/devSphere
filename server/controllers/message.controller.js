@@ -36,7 +36,7 @@ const sendMessage = async (req, res) => {
         message: newMessage,
         user: populatedUser,
       };
-      
+
       io.to(receiverSocketId).emit("sendMsg", newMessage);
       io.to(receiverSocketId).emit("sendNotiMsg", notification);
     }
@@ -125,7 +125,38 @@ const deleteMessage = async (req, res) => {
   }
 };
 
+const clearMsg = async (req, res) => {
+  try {
+    const { senderId, receiverId } = req.body;
+    let conversation = await conversationModel.findOne({
+      participants: { $all: [senderId, receiverId] },
+    });
+
+    if (!conversation) {
+      return res.status(400).json({ message: "Chatbox Already Empty" });
+    }
+
+    await conversationModel.findOneAndUpdate(
+      {
+        participants: { $all: [senderId, receiverId] },
+      },
+      { $set: { messages: [] } }
+    );
+    await messageModel.deleteMany({
+      $and: [{ senderId }, { receiverId }],
+    });
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("clrMsg", "clear");
+    }
+    return res.status(200).json({ message: "Chat Cleared" });
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR : " + error });
+  }
+};
+
 module.exports = {
+  clearMsg,
   sendMessage,
   SearchUserExceptLoggedInUser,
   getMessage,
