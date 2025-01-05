@@ -8,7 +8,6 @@ const conditionalUpload = (req, res, next) => {
     // Apply multer middleware
     return upload1.fields([{ name: "avatar", maxCount: 1 }])(req, res, next);
   }
-  // Skip multer middleware and proceed
   next();
 };
 
@@ -19,4 +18,6 @@ router
 router.route("/displayAllCounts").post(userController.displayAllCounts);
 router.route("/followUnFollow").post(userController.followUnFollow);
 router.route("/getFollowersFollowing").post(userController.getFollowersFollowing);
+router.route("/updateLastSeen/:userId").put(userController.updateLastSeen);
+
 module.exports = router;

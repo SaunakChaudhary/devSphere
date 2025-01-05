@@ -157,16 +157,14 @@ const followUnFollow = async (req, res) => {
         user: loggedinUserDetails,
       };
       io.to(receiverSocketId).emit("newMessage", noti);
-    } 
-    else if(!isFollowing){
+    } else if (!isFollowing) {
       await NotificationModel.create({
         sender: loggedInUserObjectId,
         recipient: searchedUserObjectId,
         content: " is Started Following You",
         type: "message",
       });
-    }
-    else {
+    } else {
       io.to(receiverSocketId).emit("unFollowUpdate", true);
     }
 
@@ -256,9 +254,36 @@ const getFollowersFollowing = async (req, res) => {
   }
 };
 
+const updateLastSeen = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const user = await UserModel.findByIdAndUpdate(
+      userId,
+      { lastSeen: Date.now() },
+      { new: true } // Option to return the updated document
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ message: "Last Seen Updated", user });
+  } catch (error) {
+    console.error("Error updating last seen:", error);
+    return res.status(500).json({ message: "An internal server error occurred" });
+  }
+};
+
+
 module.exports = {
   updatProfile,
   followUnFollow,
   displayAllCounts,
   getFollowersFollowing,
+  updateLastSeen
 };

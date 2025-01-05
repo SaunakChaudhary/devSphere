@@ -7,6 +7,13 @@ import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 import SyncLoader from "react-spinners/SyncLoader";
 import toast from "react-hot-toast";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import isToday from "dayjs/plugin/isToday";
+import isYesterday from "dayjs/plugin/isYesterday";
+dayjs.extend(relativeTime);
+dayjs.extend(isToday);
+dayjs.extend(isYesterday);
 
 const UserChatPage = () => {
   const [scrollWhenMessageSend, setScrollWhenMessageSend] = useState(false);
@@ -17,6 +24,21 @@ const UserChatPage = () => {
   const { socket, onlineUsers } = useContext(SocketContext);
   const [loading, setLoading] = useState(false);
   const [userDetails, setuserDetails] = useState([]);
+
+  const getLastSeenMessage = (lastSeen) => {
+    const lastSeenDate = dayjs(lastSeen);
+
+    if (lastSeenDate.isToday()) {
+      return `Last seen today at ${lastSeenDate.format("h:mm A")}`;
+    } else if (lastSeenDate.isYesterday()) {
+      return `Last seen yesterday at ${lastSeenDate.format("h:mm A")}`;
+    } else {
+      return `Last seen on ${lastSeenDate.format(
+        "MMM DD, YYYY"
+      )} at ${lastSeenDate.format("h:mm A")}`;
+    }
+  };
+
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
@@ -232,14 +254,12 @@ const UserChatPage = () => {
               <div>
                 <p className="font-bold text-sm">{userDetails.name}</p>
                 <div className="font-semibold flex items-center text-xs text-[#727272]">
-                  {onlineUsers && onlineUsers.includes(userDetails._id) ? (
+                  {onlineUsers && onlineUsers.includes(userDetails._id) && (
                     <span className="p-1 rounded-full bg-green-600 mr-2"></span>
-                  ) : (
-                    <i className="ri-time-line text-xs mr-2" />
                   )}
                   {onlineUsers && onlineUsers.includes(userDetails._id)
                     ? "Online"
-                    : `Last seen 11:02 PM`}
+                    : userDetails.lastSeen ? getLastSeenMessage(userDetails.lastSeen) : getLastSeenMessage(userDetails.createdAt)}
                 </div>
               </div>
               {longPressMessage ? (
