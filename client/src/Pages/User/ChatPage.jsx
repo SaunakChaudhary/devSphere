@@ -9,9 +9,8 @@ import SyncLoader from "react-spinners/SyncLoader";
 import toast from "react-hot-toast";
 
 const UserChatPage = () => {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  const [scrollWhenMessageSend, setScrollWhenMessageSend] = useState(false);
+  const [initalLoaded, setInitialLoaded] = useState(false);
 
   const { id } = useParams();
   const { user } = useContext(UserDataContext);
@@ -56,28 +55,22 @@ const UserChatPage = () => {
     if (socket) {
       const handleNewMessage = (newMessage) => {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
+        setScrollWhenMessageSend(true);
       };
 
+      const deleteMessage = (longPressMessage) => {
+        const msgs = messages.filter((msg) => longPressMessage != msg._id);
+        setMessages(msgs);
+      };
       socket.on("sendMsg", handleNewMessage);
+      socket.on("dltMsg", deleteMessage);
 
       return () => socket.off("sendMsg", handleNewMessage);
     }
-  }, [socket]);
+  }, [messages, socket]);
 
   const handleSendMessage = async () => {
     try {
-      if (newMessage.trim()) {
-        setMessages([
-          ...messages,
-          {
-            senderId: user._id,
-            receiverId: id,
-            message: newMessage,
-            createdAt: new Date(),
-          },
-        ]);
-        setNewMessage("");
-      }
       const response = await fetch(`${API_BASE_URL}/message/sendMessage`, {
         method: "POST",
         headers: {
@@ -91,7 +84,20 @@ const UserChatPage = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        
+        if (newMessage.trim()) {
+          setMessages([
+            ...messages,
+            {
+              _id: data.newMessage._id,
+              senderId: user._id,
+              receiverId: id,
+              message: newMessage,
+              createdAt: new Date(),
+            },
+          ]);
+          setNewMessage("");
+          setScrollWhenMessageSend(true);
+        }
       } else {
         toast.error(data.message);
       }
@@ -103,12 +109,13 @@ const UserChatPage = () => {
   const chatContainerRef = useRef(null);
 
   useEffect(() => {
-    // Scroll to the bottom of the chat container when messages change
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
-  }, [messages]);
+    setScrollWhenMessageSend(false);
+    setInitialLoaded(false);
+  }, [scrollWhenMessageSend, initalLoaded]);
 
   const [longPressMessage, setLongPressMessage] = useState(null);
 
@@ -125,6 +132,7 @@ const UserChatPage = () => {
         const data = await response.json();
         if (response.ok) {
           setMessages(data.messages);
+          setInitialLoaded(true);
         } else {
           toast.error(data.message);
         }
@@ -134,7 +142,7 @@ const UserChatPage = () => {
       }
     };
     if (user._id && id) getMessages();
-  }, [API_BASE_URL, id, user._id, longPressMessage]);
+  }, [API_BASE_URL, id, user._id]);
 
   const handleDelete = async () => {
     try {
@@ -143,10 +151,16 @@ const UserChatPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ messageId: longPressMessage }),
+        body: JSON.stringify({
+          messageId: longPressMessage,
+          receiverId: id,
+          senderId: user._id,
+        }),
       });
       const data = await response.json();
       if (response.ok) {
+        const msgs = messages.filter((msg) => longPressMessage != msg._id);
+        setMessages(msgs);
         setLongPressMessage(null);
       } else {
         toast.error(data.message);
@@ -164,7 +178,7 @@ const UserChatPage = () => {
         </div>
       )}
       <div className="hidden sm:block">
-        <UserNavbar />
+        <UserNavbar noti="noti" />
       </div>
 
       <div className="flex-grow flex flex-col md:flex-row sm:px-4 ">
@@ -175,7 +189,7 @@ const UserChatPage = () => {
         <main className="flex-grow sm:max-w-7xl bg-yellow-50">
           <section className="bg-yellow-50 flex flex-col flex-grow sm:px-3 h-screen sm:fixed sm:w-full">
             {/* Header */}
-            <h2 className="sm:border-2 flex sm:max-w-[1220px] items-center p-6 w-full gap-6 text-3xl border-black border-b font-black text-black mb-6 fixed sm:absolute bg-[#fef7cc]">
+            <h2 className="z-50 sm:border-2 flex sm:max-w-[1220px] items-center p-6 w-full gap-6 text-3xl border-black border-b font-black text-black mb-6 fixed sm:absolute bg-[#fef7cc]">
               <img
                 src={userDetails.avatar}
                 alt={userDetails.name}
@@ -208,7 +222,7 @@ const UserChatPage = () => {
                     message.senderId === user._id
                       ? `justify-end  ${
                           longPressMessage === message._id &&
-                          "bg-green-200 z-50"
+                          "bg-green-200"
                         }`
                       : longPressMessage === message._id && "bg-green-200"
                   } `}

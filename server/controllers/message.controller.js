@@ -27,11 +27,18 @@ const sendMessage = async (req, res) => {
     }
 
     await Promise.all([conversation.save(), newMessage.save()]);
+
+    const populatedUser = await UserModel.findById(receiverId);
     // socket io functionality
     const receiverSocketId = getReceiverSocketId(receiverId);
-
     if (receiverSocketId) {
+      const notification = {
+        message: newMessage,
+        user: populatedUser,
+      };
+      
       io.to(receiverSocketId).emit("sendMsg", newMessage);
+      io.to(receiverSocketId).emit("sendNotiMsg", notification);
     }
     return res
       .status(200)
@@ -86,16 +93,41 @@ const SearchUserExceptLoggedInUser = async (req, res) => {
 };
 
 const deleteMessage = async (req, res) => {
-  const { messageId } = req.body;
+  const { messageId, receiverId, senderId } = req.body;
   try {
     if (!messageId) {
       return res.status(400).json({ message: "MessageId Not Provided" });
     }
-    const dltMessage = await messageModel.findByIdAndDelete(messageId);
+
+    let conversation = await conversationModel.findOne({
+      participants: { $all: [senderId, receiverId] },
+    });
+
+    const finalMessages = conversation.messages.filter(
+      (msg) => messageId != msg
+    );
+
+    await conversationModel.findOneAndUpdate(
+      {
+        participants: { $all: [senderId, receiverId] },
+      },
+      { $set: { messages: finalMessages } }
+    );
+    await messageModel.findByIdAndDelete(messageId);
+
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("dltMsg", messageId);
+    }
     return res.status(200).json({ message: "Message Deleted" });
   } catch (error) {
     return res.status(500).json({ message: "SERVER ERROR " + error });
   }
 };
 
-module.exports = { sendMessage, SearchUserExceptLoggedInUser, getMessage ,deleteMessage };
+module.exports = {
+  sendMessage,
+  SearchUserExceptLoggedInUser,
+  getMessage,
+  deleteMessage,
+};

@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import { NavLink } from "react-router-dom";
 import { UserDataContext } from "../Context/UserContext";
 
-const UserNavbar = ({ page }) => {
+const UserNavbar = ({ page, noti }) => {
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
@@ -14,50 +14,66 @@ const UserNavbar = ({ page }) => {
   const { user } = useContext(UserDataContext);
   const { socket } = useContext(SocketContext);
 
+  const showToastNotification = (msg) => {
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+      >
+        <div className="flex-1 w-0 p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 pt-0.5">
+              <img
+                className="h-10 w-10 rounded-full"
+                src={msg.user.avatar}
+                alt=""
+              />
+            </div>
+            <div className="ml-3 flex-1">
+              {/* Accessing the message text correctly */}
+              <p className="text-sm font-medium text-gray-900">
+                {msg.user.name}
+              </p>
+              <p className="mt-1 text-sm text-gray-500">
+                {msg.message.message.length > 20
+                  ? msg.message.message.substring(0, 20) + " ..."
+                  : msg.message.message}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex border-l border-gray-200">
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    ));
+  };
+
   useEffect(() => {
     if (socket) {
       socket.on("newMessage", (msg) => {
-        toast.custom((t) => (
-          <div
-            className={`${
-              t.visible ? "animate-enter" : "animate-leave"
-            } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-          >
-            <div className="flex-1 w-0 p-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0 pt-0.5">
-                  <img
-                    className="h-10 w-10 rounded-full"
-                    src={msg.user.avatar}
-                    alt=""
-                  />
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-900">
-                    {msg.user.name + " " + msg.message}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex border-l border-gray-200">
-              <button
-                onClick={() => toast.dismiss(t.id)}
-                className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        ));
+        showToastNotification(msg);
+      });
+
+      socket.on("sendNotiMsg", (msg) => {
+        !noti && showToastNotification(msg);
       });
 
       return () => {
         socket.off("newMessage"); // Clean up listener on unmount
+        socket.off("sendNotiMsg"); // Clean up listener on unmount
       };
     }
-  }, [socket]);
+  }, [noti, socket]);
 
   const [count, setCount] = useState(0);
+
   useEffect(() => {
     const countNotiFunc = async () => {
       const response = await fetch(
@@ -71,13 +87,12 @@ const UserNavbar = ({ page }) => {
         setCount(data.count);
       }
     };
-    if(user._id) countNotiFunc();
+    if (user._id) countNotiFunc();
     if (user._id && socket) {
       socket.on("newMessage", () => {
         countNotiFunc();
       });
     }
-
   }, [API_BASE_URL, socket, user._id]);
 
   return (
@@ -101,9 +116,11 @@ const UserNavbar = ({ page }) => {
               className="text-black font-bold hover:underline hover:text-blue-700 flex items-center"
             >
               Notifications{" "}
-              {count > 0 &&<div className="text-white relative bottom-2 rounded-full w-4 text-sm h-4 bg-red-500 z-50 flex justify-center items-center">
-                {count}
-              </div>}
+              {count > 0 && (
+                <div className="text-white relative bottom-2 rounded-full w-4 text-sm h-4 bg-red-500 z-50 flex justify-center items-center">
+                  {count}
+                </div>
+              )}
             </NavLink>
             <NavLink
               to="/logout"

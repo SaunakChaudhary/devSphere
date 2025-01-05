@@ -1,6 +1,5 @@
 const NotificationModel = require("../models/handleNotification.model");
 const UserModel = require("../models/user.model");
-// const { getReceiverSocketId, io } = require("../Socket/socket");
 
 const updateNotificationMode = async (req, res) => {
   const { user, isRead } = req.body;
