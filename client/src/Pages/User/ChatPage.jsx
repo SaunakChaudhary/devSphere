@@ -75,9 +75,17 @@ const UserChatPage = () => {
 
   useEffect(() => {
     if (socket) {
-      const handleNewMessage = (newMessage) => {
+      const handleNewMessage = async (newMessage) => {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
         setScrollWhenMessageSend(true);
+        const response = await fetch(
+          `${API_BASE_URL}/message/isRead/${user?._id}/${id}`,
+          {
+            method: "PUT",
+          }
+        );
+        const data = await response.json();
+        if (!response.ok) toast.error(data.message);
       };
 
       const deleteMessage = (longPressMessage) => {
@@ -95,7 +103,7 @@ const UserChatPage = () => {
 
       return () => socket.off("sendMsg", handleNewMessage);
     }
-  }, [messages, socket]);
+  }, [API_BASE_URL, id, messages, socket, user?._id]);
 
   const handleSendMessage = async () => {
     try {
@@ -259,7 +267,9 @@ const UserChatPage = () => {
                   )}
                   {onlineUsers && onlineUsers.includes(userDetails._id)
                     ? "Online"
-                    : userDetails.lastSeen ? getLastSeenMessage(userDetails.lastSeen) : getLastSeenMessage(userDetails.createdAt)}
+                    : userDetails.lastSeen
+                    ? getLastSeenMessage(userDetails.lastSeen)
+                    : getLastSeenMessage(userDetails.createdAt)}
                 </div>
               </div>
               {longPressMessage ? (

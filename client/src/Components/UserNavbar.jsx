@@ -12,7 +12,7 @@ const UserNavbar = ({ page, noti }) => {
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
-  const { user, setReChats } = useContext(UserDataContext);
+  const { user, setReChats, reChats } = useContext(UserDataContext);
   const { socket } = useContext(SocketContext);
 
   const showToastNotification = (msg) => {
@@ -116,28 +116,48 @@ const UserNavbar = ({ page, noti }) => {
   }, [noti, socket]);
 
   const [count, setCount] = useState(0);
-
+  
   useEffect(() => {
     const countNotiFunc = async () => {
-      const response = await fetch(
-        `${API_BASE_URL}/notification/notificationCount/${user._id}`,
-        {
-          method: "GET",
+      if (user._id) {
+        const response = await fetch(
+          `${API_BASE_URL}/notification/notificationCount/${user._id}`,
+          {
+            method: "GET",
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setCount(data.count); // Update notification count
         }
-      );
-      const data = await response.json();
-      if (response.ok) {
-        setCount(data.count);
       }
     };
-    if (user._id) countNotiFunc();
-    if (user._id && socket) {
+  
+    // Initially fetch notification count
+    if (user._id) {
+      countNotiFunc();
+    }
+  
+    // Set up socket listener for new messages
+    if (socket) {
       socket.on("newMessage", () => {
         countNotiFunc();
       });
+  
+      socket.on("sendNotiMsg", () => {
+        countNotiFunc();
+      });
     }
+  
+    // Cleanup socket listeners when component unmounts
+    return () => {
+      if (socket) {
+        socket.off("newMessage");
+        socket.off("sendNotiMsg");
+      }
+    };
   }, [API_BASE_URL, socket, user._id]);
-
+  
   useEffect(() => {
     const fetchRecentChats = async () => {
       try {
@@ -154,9 +174,26 @@ const UserNavbar = ({ page, noti }) => {
         toast.error(error);
       }
     };
-    if (user._id) fetchRecentChats();
-  }, [API_BASE_URL,user._id]);
 
+    if (user._id) {
+      fetchRecentChats();
+      if (socket) {
+        socket.on("sendNotiMsg", () => {
+          fetchRecentChats();
+        });
+      }
+    }
+  }, [API_BASE_URL, user._id]);
+
+  const [totalMsgCount, setTotalMsgCount] = useState(0);
+
+  useEffect(() => {
+    const unreadCount = reChats.reduce(
+      (total, chat) => total + chat.isReadCount,
+      0
+    );
+    setTotalMsgCount(unreadCount);
+  }, [reChats]);
   return (
     <div>
       {/* Navbar */}
@@ -199,14 +236,18 @@ const UserNavbar = ({ page, noti }) => {
               <span className="text-2xl">🏆</span>
             </NavLink>
             <NavLink to="/user/notification" className="text-black font-bold">
-              {count === 0 ? (
-                <i className="mr-3 ri-notification-badge-line text-2xl active:text-red-500"></i>
-              ) : (
-                <i className="mr-3 ri-notification-badge-fill text-2xl active:text-red-700 text-red-500"></i>
+              <i className="mr-3 ri-notification-3-fill text-2xl active:text-red-500"></i>
+              {count !== 0 && (
+                <div className="w-4 h-4 absolute top-8 right-[73px] bg-red-500 rounded-full text-white text-sm flex justify-center items-center">
+                  {count}
+                </div>
               )}
             </NavLink>
             <NavLink to="/user/chat" className="text-black font-bold">
               <i className="ri-message-2-line text-2xl active:text-red-500"></i>
+              {totalMsgCount!=0 && <div className="w-4 h-4 absolute top-8 right-9 bg-red-500 rounded-full text-white text-sm flex justify-center items-center">
+                {totalMsgCount}
+              </div>}
             </NavLink>
           </div>
         </nav>

@@ -157,6 +157,12 @@ const followUnFollow = async (req, res) => {
         user: loggedinUserDetails,
       };
       io.to(receiverSocketId).emit("newMessage", noti);
+      await NotificationModel.create({
+        sender: loggedInUserObjectId,
+        recipient: searchedUserObjectId,
+        content: " is Started Following You",
+        type: "message",
+      });
     } else if (!isFollowing) {
       await NotificationModel.create({
         sender: loggedInUserObjectId,

@@ -1,3 +1,4 @@
+const Conversation = require("../models/conversation.model");
 const conversationModel = require("../models/conversation.model");
 const messageModel = require("../models/message.model");
 const UserModel = require("../models/user.model");
@@ -62,7 +63,15 @@ const getMessage = async (req, res) => {
     if (!conversation) {
       return res.status(200).json({ messages: [] });
     }
-
+    await messageModel.updateMany(
+      {
+        $and: [
+          { _id: { $in: conversation.messages } },
+          { senderId: receiverId },
+        ],
+      },
+      { $set: { isRead: true } }
+    );
     return res.status(200).json({
       messages: conversation.messages,
     });
@@ -86,7 +95,25 @@ const SearchUserExceptLoggedInUser = async (req, res) => {
       ],
     });
 
-    return res.status(200).json(allUserExceptLoggedIn);
+    const usersWithLastMessage = await Promise.all(
+      allUserExceptLoggedIn.map(async (user) => {
+        const lastMessage = await messageModel
+          .findOne({
+            $or: [
+              { senderId: loggedInUser, receiverId: user._id },
+              { senderId: user._id, receiverId: loggedInUser },
+            ],
+          })
+          .sort({ updatedAt: -1 });
+
+        return {
+          ...user.toObject(),
+          lastMessage: lastMessage || "",
+        };
+      })
+    );
+
+    return res.status(200).json(usersWithLastMessage);
   } catch (error) {
     return res.status(500).json({ message: "SERVER ERROR : " + error });
   }
@@ -158,23 +185,75 @@ const clearMsg = async (req, res) => {
 const recentChats = async (req, res) => {
   try {
     const { senderId } = req.params;
-    let conversations = await messageModel
-      .find({ senderId })
-      .populate("receiverId") 
+
+    // Find all conversations involving the sender
+    let conversations = await Conversation.find({
+      participants: { $in: [senderId] },
+    })
+      .populate({
+        path: "messages",
+        options: { sort: { createdAt: -1 } }, 
+        populate: { path: "senderId receiverId isRead" },
+      })
+      .populate({
+        path: "participants",
+        select: "name email username avatar",
+      })
       .sort({ updatedAt: -1 });
 
-    // Remove duplicate conversations based on `_id`
-    const uniqueConversations = Array.from(
-      new Map(
-        conversations.map((conv) => [conv.receiverId._id.toString(), conv])
-      ).values()
-    );
+    // Format the response to include only relevant data
+    const formattedConversations = conversations.map((conv) => {
+      const otherParticipant = conv.participants.find(
+        (participant) => participant._id.toString() !== senderId
+      );
 
-    // Respond with the unique conversations
+      const messages = conv.messages;
+      const isReadCount = messages.filter((msg) => msg.isRead === false &&  msg.receiverId && 
+      msg.receiverId._id.toString() === senderId).length;
+      
+      const latestMessage = conv.messages.length > 0 ? conv.messages[0] : null;
+
+      return {
+        conversationId: conv._id,
+        otherParticipant,
+        latestMessage,
+        isReadCount,
+      };
+    });
+
+    // Respond with the formatted conversations
     return res.status(200).json({
       message: "Conversations retrieved successfully",
-      conversations: uniqueConversations,
+      conversations: formattedConversations,
     });
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR: " + error.message });
+  }
+};
+
+const isRead = async (req, res) => {
+  try {
+    const { receiverId, senderId } = req.params;
+
+    const conversation = await conversationModel
+      .findOne({
+        participants: { $all: [senderId, receiverId] },
+      })
+      .populate("messages");
+    if (!conversation) {
+      return res.status(200).json({ messages: [] });
+    }
+
+    await messageModel.updateMany(
+      {
+        $and: [
+          { _id: { $in: conversation.messages } },
+          { senderId: receiverId },
+        ],
+      },
+      { $set: { isRead: true } }
+    );
+    return res.status(200).json({ message: "isRead" });
   } catch (error) {
     return res.status(500).json({ message: "SERVER ERROR : " + error });
   }
@@ -187,4 +266,5 @@ module.exports = {
   getMessage,
   deleteMessage,
   recentChats,
+  isRead,
 };

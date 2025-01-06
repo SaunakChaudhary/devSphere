@@ -5,11 +5,32 @@ import { UserDataContext } from "../../Context/UserContext";
 import { useContext, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import isToday from "dayjs/plugin/isToday";
+import isYesterday from "dayjs/plugin/isYesterday";
+dayjs.extend(relativeTime);
+dayjs.extend(isToday);
+dayjs.extend(isYesterday);
 
 const RecentChats = () => {
   const navigate = useNavigate();
-
+  
   const { user, reChats } = useContext(UserDataContext);
+
+  const getLastSeenMessage = (lastSeen) => {
+    const lastSeenDate = dayjs(lastSeen);
+
+    if (lastSeenDate.isToday()) {
+      return `${lastSeenDate.format("h:mm A")}`;
+    } else if (lastSeenDate.isYesterday()) {
+      return `yesterday`;
+    } else {
+      return `${lastSeenDate.format("MMM DD, YYYY")} at ${lastSeenDate.format(
+        "h:mm A"
+      )}`;
+    }
+  };
 
   const isLocalhost = window.location.hostname === "localhost";
 
@@ -100,27 +121,37 @@ const RecentChats = () => {
                         {reChats.map((chat) => (
                           <article
                             onClick={() =>
-                              navigate(`/user/userChat/${chat.receiverId._id}`)
+                              navigate(
+                                `/user/userChat/${chat.otherParticipant._id}`
+                              )
                             }
-                            key={chat._id}
-                            className="bg-white border-2 rounded-lg  border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer flex items-center gap-4"
+                            key={chat.otherParticipant._id}
+                            className="bg-white border-2 rounded-lg  border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 cursor-pointer flex items-center gap-4"
                           >
                             <img
-                              src={chat.receiverId.avatar}
-                              alt={chat.receiverId.name}
+                              src={chat.otherParticipant.avatar}
+                              alt={chat.otherParticipant.name}
                               className="w-12 h-12 md:w-16 md:h-16 border-2 border-black rounded-full"
                             />
                             <div>
                               <h3 className="text-lg md:text-xl font-black mb-1">
-                                {chat.receiverId.name}
+                                {chat.otherParticipant.name}
                               </h3>
                               <p className="text-gray-600 text-sm mb-1 line-clamp-1">
-                                {chat.receiverId.lastMessage || "Hiii"}
+                                {chat.latestMessage &&
+                                  chat.latestMessage.message}
                               </p>
                               <span className="text-gray-500 text-xs">
-                                {chat.receiverId.time || "10:30 pm"}
+                                {chat.latestMessage &&
+                                  getLastSeenMessage(chat.createdAt)}
                               </span>
                             </div>
+                            {
+                              chat.isReadCount != 0 && (
+                                <div className="w-6 h-6 rounded-full bg-red-500 absolute right-14 flex items-center justify-center text-white font-bold">
+                                  {chat.isReadCount}
+                                </div>
+                              )}
                           </article>
                         ))}
                       </div>
@@ -151,10 +182,12 @@ const RecentChats = () => {
                               {chat.name}
                             </h3>
                             <p className="text-gray-600 text-sm mb-1 line-clamp-1">
-                              {chat.lastMessage || "Hiii"}
+                              {chat.lastMessage.message}
                             </p>
                             <span className="text-gray-500 text-xs">
-                              {chat.time || "10:30 pm"}
+                              {chat.lastMessage.message
+                                ? getLastSeenMessage(chat.lastMessage.updatedAt)
+                                : ""}
                             </span>
                           </div>
                         </article>
