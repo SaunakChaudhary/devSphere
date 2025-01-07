@@ -34,15 +34,21 @@ export const SocketContextProvider = ({ children }) => {
 
       setSocket(newSocket);
 
+      // Notify server when the tab is closed
+      const handleTabClose = () => {
+        newSocket.emit("logout", user._id);
+        newSocket.close(); // Close the socket connection
+      };
+
+      window.addEventListener("beforeunload", handleTabClose);
+
       newSocket.on("getOnlineUsers", (onlineUsers) => {
-        const prevOnlineUsers = prevOnlineUsersRef.current;
 
-        const deletedElements = prevOnlineUsers.filter(
-          (item) => !onlineUsers.includes(item)
-        );
+        // Check if the current user is no longer online
+        const isCurrentUserOffline = !onlineUsers.includes(user._id);
 
-        if (deletedElements.length > 0) {
-          const lastSeenUpadte = async () => {
+        if (isCurrentUserOffline) {
+          const lastSeenUpdate = async () => {
             try {
               const response = await fetch(
                 `${API_BASE_URL}/user/updateLastSeen/${user._id}`,
@@ -53,17 +59,19 @@ export const SocketContextProvider = ({ children }) => {
               const data = await response.json();
               if (!response.ok) toast.error(data.message);
             } catch (error) {
-              toast.error(error);
+              toast.error(error.message || "Error updating last seen");
             }
           };
-          lastSeenUpadte();
+          lastSeenUpdate();
         }
 
+        // Update the online users state and reference
         setOnlineUsers(onlineUsers);
         prevOnlineUsersRef.current = onlineUsers;
       });
 
       return () => {
+        window.removeEventListener("beforeunload", handleTabClose);
         newSocket.off();
         newSocket.close();
       };

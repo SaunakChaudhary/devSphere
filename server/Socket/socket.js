@@ -25,23 +25,22 @@ const io = new Server(server, {
 });
 
 // Map to store user IDs and associated socket IDs
-const userSocketMap = [];
+const userSocketMap = {};
 
-// Helper function to get the receiver's socket ID(s)
-const getReceiverSocketId = (receiverId) => {
-  return userSocketMap[receiverId];
-};
+// Helper function to get online users
+const getOnlineUsers = () => Object.keys(userSocketMap);
 
 // Handle socket connection
 io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
 
   if (userId) {
+    // Add the user's socket ID
     if (!userSocketMap[userId]) {
       userSocketMap[userId] = [];
     }
     userSocketMap[userId].push(socket.id);
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    io.emit("getOnlineUsers", getOnlineUsers());
   }
 
   // Handle disconnection
@@ -55,17 +54,32 @@ io.on("connection", (socket) => {
       // If no more sockets are associated with the user, remove the entry
       if (userSocketMap[userId].length === 0) {
         delete userSocketMap[userId];
+        // Update last seen for the user
+        updateLastSeenInDatabase(userId);
       }
+
+      io.emit("getOnlineUsers", getOnlineUsers());
     }
   });
 
-  socket.on("logout", () => {
+  // Handle logout
+  socket.on("logout", (userId) => {
     if (userId && userSocketMap[userId]) {
-      // Remove the user from the socket map
       delete userSocketMap[userId];
-      io.emit("getOnlineUsers", Object.keys(userSocketMap)); // Emit updated list of online users
+      io.emit("getOnlineUsers", getOnlineUsers());
+      updateLastSeenInDatabase(userId);
     }
   });
 });
 
-module.exports = { app, server, io, getReceiverSocketId };
+// Function to update last seen in the database
+const updateLastSeenInDatabase = async (userId) => {
+  try {
+    // Replace with your database logic
+    console.log(`Updating last seen for user: ${userId}`);
+  } catch (err) {
+    console.error("Failed to update last seen for user:", userId, err);
+  }
+};
+
+module.exports = { app, server, io };
