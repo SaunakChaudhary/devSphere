@@ -2,9 +2,10 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { UserDataContext } from "./UserContext";
+import toast from "react-hot-toast";
 
 export const SocketContext = createContext();
 
@@ -18,6 +19,8 @@ export const SocketContextProvider = ({ children }) => {
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
 
+  const prevOnlineUsersRef = useRef([]);
+
   useEffect(() => {
     if (user && user._id) {
       const newSocket = io(API_BASE_URL, {
@@ -30,8 +33,34 @@ export const SocketContextProvider = ({ children }) => {
       });
 
       setSocket(newSocket);
+
       newSocket.on("getOnlineUsers", (onlineUsers) => {
+        const prevOnlineUsers = prevOnlineUsersRef.current;
+
+        const deletedElements = prevOnlineUsers.filter(
+          (item) => !onlineUsers.includes(item)
+        );
+
+        if (deletedElements.length > 0) {
+          const lastSeenUpadte = async () => {
+            try {
+              const response = await fetch(
+                `${API_BASE_URL}/user/updateLastSeen/${user._id}`,
+                {
+                  method: "PUT",
+                }
+              );
+              const data = await response.json();
+              if (!response.ok) toast.error(data.message);
+            } catch (error) {
+              toast.error(error);
+            }
+          };
+          lastSeenUpadte();
+        }
+
         setOnlineUsers(onlineUsers);
+        prevOnlineUsersRef.current = onlineUsers;
       });
 
       return () => {
@@ -45,7 +74,7 @@ export const SocketContextProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <SocketContext.Provider value={{ socket,onlineUsers }}>
+    <SocketContext.Provider value={{ socket, onlineUsers }}>
       {children}
     </SocketContext.Provider>
   );

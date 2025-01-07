@@ -267,9 +267,8 @@ const UserChatPage = () => {
                   )}
                   {onlineUsers && onlineUsers.includes(userDetails._id)
                     ? "Online"
-                    : userDetails.lastSeen
-                    ? getLastSeenMessage(userDetails.lastSeen)
-                    : getLastSeenMessage(userDetails.createdAt)}
+                    : getLastSeenMessage(userDetails.lastseen) !== Date.now() &&
+                      getLastSeenMessage(userDetails.updatedAt)}
                 </div>
               </div>
               {longPressMessage ? (
