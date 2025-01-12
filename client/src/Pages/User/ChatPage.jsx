@@ -311,6 +311,7 @@ const UserChatPage = () => {
                         }`
                       : longPressMessage === message._id && "bg-green-200"
                   } `}
+
                   onTouchStart={(e) => {
                     const timer = setTimeout(
                       () => handleLongPress(message._id),
@@ -324,6 +325,7 @@ const UserChatPage = () => {
                       }
                     );
                   }}
+                  
                 >
                   <div
                     className={`p-3 sm:max-w-96 rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-black ${

@@ -27,6 +27,10 @@ const io = new Server(server, {
 // Map to store user IDs and associated socket IDs
 const userSocketMap = {};
 
+const getReceiverSocketId = (receiverId) => {
+  return userSocketMap[receiverId];
+};
+
 // Helper function to get online users
 const getOnlineUsers = () => Object.keys(userSocketMap);
 
@@ -54,8 +58,6 @@ io.on("connection", (socket) => {
       // If no more sockets are associated with the user, remove the entry
       if (userSocketMap[userId].length === 0) {
         delete userSocketMap[userId];
-        // Update last seen for the user
-        updateLastSeenInDatabase(userId);
       }
 
       io.emit("getOnlineUsers", getOnlineUsers());
@@ -67,19 +69,8 @@ io.on("connection", (socket) => {
     if (userId && userSocketMap[userId]) {
       delete userSocketMap[userId];
       io.emit("getOnlineUsers", getOnlineUsers());
-      updateLastSeenInDatabase(userId);
     }
   });
 });
 
-// Function to update last seen in the database
-const updateLastSeenInDatabase = async (userId) => {
-  try {
-    // Replace with your database logic
-    console.log(`Updating last seen for user: ${userId}`);
-  } catch (err) {
-    console.error("Failed to update last seen for user:", userId, err);
-  }
-};
-
-module.exports = { app, server, io };
+module.exports = { app, server, io,getReceiverSocketId };

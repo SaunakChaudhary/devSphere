@@ -5,6 +5,7 @@ const messageController = require("../controllers/message.controller");
 router.route("/SearchUserExceptLoggedInUser/:query").post(messageController.SearchUserExceptLoggedInUser);
 router.route("/sendMessage").post(messageController.sendMessage);
 router.route("/deleteMessage").delete(messageController.deleteMessage);
+router.route("/DeleteConversation").delete(messageController.DeleteConversation);
 router.route("/clear-msg").delete(messageController.clearMsg);
 router.route("/recentChats/:senderId").get(messageController.recentChats);
 router.route("/getMessage/:senderId/:receiverId").get(messageController.getMessage);

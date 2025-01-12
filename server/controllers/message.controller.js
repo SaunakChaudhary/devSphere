@@ -192,7 +192,7 @@ const recentChats = async (req, res) => {
     })
       .populate({
         path: "messages",
-        options: { sort: { createdAt: -1 } }, 
+        options: { sort: { createdAt: -1 } },
         populate: { path: "senderId receiverId isRead" },
       })
       .populate({
@@ -208,9 +208,13 @@ const recentChats = async (req, res) => {
       );
 
       const messages = conv.messages;
-      const isReadCount = messages.filter((msg) => msg.isRead === false &&  msg.receiverId && 
-      msg.receiverId._id.toString() === senderId).length;
-      
+      const isReadCount = messages.filter(
+        (msg) =>
+          msg.isRead === false &&
+          msg.receiverId &&
+          msg.receiverId._id.toString() === senderId
+      ).length;
+
       const latestMessage = conv.messages.length > 0 ? conv.messages[0] : null;
 
       return {
@@ -259,7 +263,38 @@ const isRead = async (req, res) => {
   }
 };
 
+const DeleteConversation = async (req, res) => {
+  try {
+    const { convId } = req.body;
+    if (!convId)
+      return res.status(400).json({ message: "Conversation Id is Required" });
+    const data = await conversationModel.findByIdAndDelete(convId);
+    await messageModel.deleteMany({
+      $or: [
+        {
+          $and: [
+            { senderId: data.participants[0] },
+            { receiverId: data.participants[1] },
+          ],
+        },
+        {
+          $and: [
+            { senderId: data.participants[1] },
+            { receiverId: data.participants[0] },
+          ],
+        },
+      ],
+    });
+    return res
+      .status(200)
+      .json({ message: "Conversation Deleted Successfully"});
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR : " + error});
+  }
+};
+
 module.exports = {
+  DeleteConversation,
   clearMsg,
   sendMessage,
   SearchUserExceptLoggedInUser,

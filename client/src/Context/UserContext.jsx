@@ -15,6 +15,7 @@ const UserContext = ({ children }) => {
 
   const [globalHashtags, setGlobalHashtags] = useState([]);
   const [reChats, setReChats] = useState([]);
+  const [allCommunity, setAllCommunity] = useState([]);
 
   return (
     <UserDataContext.Provider
@@ -25,6 +26,8 @@ const UserContext = ({ children }) => {
         globalHashtags,
         setReChats,
         reChats,
+        allCommunity,
+        setAllCommunity,
       }}
     >
       {children}

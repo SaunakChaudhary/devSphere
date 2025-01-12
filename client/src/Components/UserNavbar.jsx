@@ -6,13 +6,15 @@ import { SocketContext } from "../Context/SocketContext";
 import { toast } from "react-hot-toast";
 import { NavLink, useNavigate } from "react-router-dom";
 import { UserDataContext } from "../Context/UserContext";
+
 const UserNavbar = ({ page, noti }) => {
   const navigate = useNavigate();
   const isLocalhost = window.location.hostname === "localhost";
   const API_BASE_URL = isLocalhost
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
-  const { user, setReChats, reChats } = useContext(UserDataContext);
+  const { user, setReChats, reChats, setAllCommunity } =
+    useContext(UserDataContext);
   const { socket } = useContext(SocketContext);
 
   const showToastNotification = (msg) => {
@@ -116,7 +118,7 @@ const UserNavbar = ({ page, noti }) => {
   }, [noti, socket]);
 
   const [count, setCount] = useState(0);
-  
+
   useEffect(() => {
     const countNotiFunc = async () => {
       if (user._id) {
@@ -132,23 +134,23 @@ const UserNavbar = ({ page, noti }) => {
         }
       }
     };
-  
+
     // Initially fetch notification count
     if (user._id) {
       countNotiFunc();
     }
-  
+
     // Set up socket listener for new messages
     if (socket) {
       socket.on("newMessage", () => {
         countNotiFunc();
       });
-  
+
       socket.on("sendNotiMsg", () => {
         countNotiFunc();
       });
     }
-  
+
     // Cleanup socket listeners when component unmounts
     return () => {
       if (socket) {
@@ -157,7 +159,7 @@ const UserNavbar = ({ page, noti }) => {
       }
     };
   }, [API_BASE_URL, socket, user._id]);
-  
+
   useEffect(() => {
     const fetchRecentChats = async () => {
       try {
@@ -177,11 +179,35 @@ const UserNavbar = ({ page, noti }) => {
 
     if (user._id) {
       fetchRecentChats();
+
       if (socket) {
         socket.on("sendNotiMsg", () => {
           fetchRecentChats();
         });
       }
+    }
+  }, [API_BASE_URL, user._id]);
+
+  useEffect(() => {
+    const fetchAllCommunity = async () => {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/community/displayAllCommunity`
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setAllCommunity(data);
+        } else {
+          toast.error(data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    };
+
+    // Fetch communities initially
+    if (user._id) {
+      fetchAllCommunity();
     }
   }, [API_BASE_URL, user._id]);
 
@@ -194,6 +220,7 @@ const UserNavbar = ({ page, noti }) => {
     );
     setTotalMsgCount(unreadCount);
   }, [reChats]);
+
   return (
     <div>
       {/* Navbar */}
@@ -245,9 +272,11 @@ const UserNavbar = ({ page, noti }) => {
             </NavLink>
             <NavLink to="/user/chat" className="text-black font-bold">
               <i className="ri-message-2-line text-2xl active:text-red-500"></i>
-              {totalMsgCount!=0 && <div className="w-4 h-4 absolute top-8 right-9 bg-red-500 rounded-full text-white text-sm flex justify-center items-center">
-                {totalMsgCount}
-              </div>}
+              {totalMsgCount != 0 && (
+                <div className="w-4 h-4 absolute top-8 right-9 bg-red-500 rounded-full text-white text-sm flex justify-center items-center">
+                  {totalMsgCount}
+                </div>
+              )}
             </NavLink>
           </div>
         </nav>

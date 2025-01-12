@@ -24,11 +24,14 @@ import ProjectsHashtag from "./Pages/User/ProjectsHashtag";
 import ChatPage from "./Pages/User/ChatPage";
 import RecentChats from "./Pages/User/RecentChats";
 import UserSettings from "./Pages/User/UserSettings";
+import CommChat from "./Pages/User/CommChat";
+import CommChatPost from "./Pages/User/CommChatPost";
 
 const App = () => {
   return (
     <Routes>
       {/* Normal Routes */}
+
       <Route path="/" element={<Landing />} />
       <Route path="/about" element={<AboutPage />} />
       <Route
@@ -49,6 +52,8 @@ const App = () => {
       />
       <Route path="/logout" element={<Logout />} />
       <Route path="/*" element={<PNF />} />
+
+
       {/* Auth Routes */}
       <Route
         path="/organization-signup"
@@ -98,7 +103,7 @@ const App = () => {
             <Challenges />
           </UserProtected>
         }
-      />{" "}
+      />
       <Route
         path="/user/achievements"
         element={
@@ -154,7 +159,7 @@ const App = () => {
             <ProjectsHashtag />
           </UserProtected>
         }
-      />{" "}
+      />
       <Route
         path="/user/chat"
         element={
@@ -162,7 +167,7 @@ const App = () => {
             <RecentChats />
           </UserProtected>
         }
-      />{" "}
+      />
       <Route
         path="/user/userChat/:id"
         element={
@@ -170,7 +175,23 @@ const App = () => {
             <ChatPage />
           </UserProtected>
         }
-      />{" "}
+      />
+      <Route
+        path="/user/commChat/:id"
+        element={
+          <UserProtected>
+            <CommChat />
+          </UserProtected>
+        }
+      />
+      <Route
+        path="/user/commChatPost/:id"
+        element={
+          <UserProtected>
+            <CommChatPost />
+          </UserProtected>
+        }
+      />
       <Route
         path="/user/settings"
         element={
@@ -178,7 +199,7 @@ const App = () => {
             <UserSettings />
           </UserProtected>
         }
-      />{" "}
+      />
       <Route path="/user/:id" element={<Redirect />} />{" "}
     </Routes>
   );
