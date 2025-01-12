@@ -335,7 +335,8 @@ const RecentChats = () => {
                                 {comm.name}
                               </h3>
                               <p className="text-sm font-bold">
-                                Members : {comm.members && comm.members.length}
+                                Members :{" "}
+                                {comm.members && comm.members.length - 1}
                               </p>
                             </div>
                           </article>
@@ -427,7 +428,7 @@ const RecentChats = () => {
                                 </h3>
                                 <p className="text-sm font-bold">
                                   Members :{" "}
-                                  {comm.members && comm.members.length}
+                                  {comm.members && comm.members.length - 1}
                                 </p>
                               </div>
                             </article>

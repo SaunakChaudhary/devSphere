@@ -3,7 +3,7 @@ import SyncLoader from "react-spinners/SyncLoader";
 import UserNavbar from "../../Components/UserNavbar";
 import UserSlidebar from "../../Components/UserSlidebar";
 import toast from "react-hot-toast";
-import { useParams,useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { UserDataContext } from "../../Context/UserContext";
 import { SocketContext } from "../../Context/SocketContext";
 
@@ -11,88 +11,93 @@ const CommChat = () => {
   const navigate = useNavigate();
   const { user } = useContext(UserDataContext);
   const { id } = useParams();
-  const isLocalhost = window.location.hostname === "localhost";
-
   const { socket } = useContext(SocketContext);
   const [loading, setLoading] = useState(false);
-  const [commDetails, setCommDetails] = useState(false);
-  const [checkJoin, setCheckJoin] = useState(false);
+  const [commDetails, setCommDetails] = useState();
+  const [membersCount, setMembersCount] = useState(0);
+  const [isJoined, setIsJoined] = useState(false);
 
-  const API_BASE_URL = isLocalhost
+  const API_BASE_URL = window.location.hostname === "localhost"
     ? "http://localhost:5000"
     : "https://devsphere-backend-bxxx.onrender.com";
-  const [members, setMembers] = useState(0);
 
+  // Fetch community details
   useEffect(() => {
-    if (socket) {
-      socket.on("joinComm", (msg) => {
-        setMembers(msg);
-      });
-    }
-  }, [socket]);
-
-  useEffect(() => {
-    const fetchUserDetails = async () => {
+    const fetchCommunityDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `${API_BASE_URL}/community/searchedCommunity/${id}`,
-          {
-            method: "GET",
-          }
-        );
+        const response = await fetch(`${API_BASE_URL}/community/searchedCommunity/${id}`);
         const data = await response.json();
+
         if (response.ok) {
           setCommDetails(data.community);
+          setMembersCount(data.community.members.length);
+          setIsJoined(data.community.members.some((member) => member._id === user._id));
         } else {
           toast.error(data.message);
         }
-        setLoading(false);
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching community details:", error);
+      } finally {
         setLoading(false);
       }
     };
-    fetchUserDetails();
-  }, [API_BASE_URL, id]);
 
-  const handleJoin = async (id) => {
+    if (id) fetchCommunityDetails();
+  }, [API_BASE_URL, id, user._id]);
+
+  // Real-time updates for community members
+  useEffect(() => {
+    if (socket) {
+      socket.on("joinComm", (updatedCount) => {
+        setMembersCount(updatedCount);
+      });
+    }
+
+    return () => {
+      if (socket) socket.off("joinComm");
+    };
+  }, [socket]);
+
+  const handleJoin = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/community/joinCommunity`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ CommunityId: id, userId: user._id }),
       });
 
       const data = await response.json();
       if (response.ok) {
-        setCheckJoin(!checkJoin);
+        setIsJoined(!isJoined);
         toast.success(data.message);
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error);
+      console.error("Error joining community:", error);
+      toast.error("Something went wrong!");
     }
   };
 
   return (
     <div className="bg-yellow-50 flex flex-col">
       {loading && (
-        <div className="flex justify-center items-center text-white fixed top-0 w-full h-screen bg-black bg-opacity-45 z-50">
+        <div className="flex justify-center items-center fixed top-0 w-full h-screen bg-black bg-opacity-45 z-50">
           <SyncLoader color="skyblue" loading={loading} size={15} />
         </div>
       )}
+
       <div className="hidden sm:block">
         <UserNavbar noti="noti" />
       </div>
+
       <div className="flex-grow flex flex-col md:flex-row sm:px-4">
         <div className="hidden sm:block mb-4 md:mb-0">
           <UserSlidebar />
         </div>
-        {!loading && (
+
+        {!loading && commDetails && (
           <main className="flex-grow sm:max-w-7xl">
             <section className="flex flex-col flex-grow sm:px-3">
               {/* Header */}
@@ -103,7 +108,7 @@ const CommChat = () => {
                   backgroundSize: "cover",
                   backgroundRepeat: "no-repeat",
                 }}
-                className="h-52 border-b-2 sm:border-2 border-black "
+                className="h-52 border-b-2 sm:border-2 border-black"
               >
                 <img
                   src={commDetails.logo}
@@ -116,40 +121,28 @@ const CommChat = () => {
                     {commDetails.name}
                   </div>
                   <div className="absolute text-xs top-[234px] text-gray-600 left-[154px]">
-                    <span className="font-bold">Members : </span>
-                    {commDetails.members &&
-                    commDetails.members.length &&
-                    members === 0
-                      ? commDetails.members.length - 1
-                      : members - 1}
+                    <span className="font-bold">Members: </span>
+                    {membersCount -1}
                   </div>
                 </div>
+
                 <div className="border-b border-gray-400">
                   <div className="mt-[298px] text-sm mx-auto w-5/6">
                     {commDetails.description}
                   </div>
                   <div className="w-5/6 mx-auto mt-2 mb-5">
                     <button
-                      onClick={() => handleJoin(commDetails._id)}
+                      onClick={handleJoin}
                       className={`${
-                        commDetails.members &&
-                        commDetails.members.find(
-                          (member) => member._id == user._id
-                        ) || checkJoin
-                          ? "border-2 border-blue-500"
-                          : "bg-blue-500"
+                        isJoined ? "border-2 border-blue-500" : "bg-blue-500 text-white"
                       } w-full font-bold rounded-lg p-1.5`}
                     >
-                      {commDetails.members &&
-                      commDetails.members.find(
-                        (member) => member._id == user._id
-                      ) || checkJoin
-                        ? "Joined"
-                        : "Join"}
+                      {isJoined ? "Joined" : "Join"}
                     </button>
                     <button
-                    onClick={()=>navigate(`/user/commChatPost/${commDetails._id}`)}
-                    className="bg-yellow-300 w-full font-bold rounded-lg p-1.5 border-2 border-yellow-500 mt-5">
+                      onClick={() => navigate(`/user/commChatPost/${commDetails._id}`)}
+                      className="bg-yellow-300 w-full font-bold rounded-lg p-1.5 border-2 border-yellow-500 mt-5"
+                    >
                       View Community
                     </button>
                   </div>
