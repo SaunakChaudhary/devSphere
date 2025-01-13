@@ -399,7 +399,7 @@ const UserChatPage = () => {
                           <SyntaxHighlighter
                             language={message.language}
                             style={monokaiSublime}
-                            className="w-[350px] sm:w-[1000px] rounded-md p-2"
+                            className="w-[350px] sm:w-[1000px] rounded-md p-2 text-xs"
                           >
                             {message.message}
                           </SyntaxHighlighter>
