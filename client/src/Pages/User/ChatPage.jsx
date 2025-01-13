@@ -15,7 +15,8 @@ dayjs.extend(relativeTime);
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
-import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { monokaiSublime } from "react-syntax-highlighter/dist/esm/styles/hljs";
+
 
 const UserChatPage = () => {
 
@@ -397,7 +398,7 @@ const UserChatPage = () => {
                         {message.isCode ? (
                           <SyntaxHighlighter
                             language={message.language}
-                            style={atomOneDark}
+                            style={monokaiSublime}
                             className="w-[350px] sm:w-[1000px] rounded-md p-2"
                           >
                             {message.message}
