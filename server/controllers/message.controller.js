@@ -6,7 +6,8 @@ const { getReceiverSocketId, io } = require("../Socket/socket");
 
 const sendMessage = async (req, res) => {
   try {
-    const { message, senderId, receiverId } = req.body;
+    const { message, senderId, receiverId, isCode,language } = req.body;
+
     let conversation = await conversationModel.findOne({
       participants: { $all: [senderId, receiverId] },
     });
@@ -21,6 +22,8 @@ const sendMessage = async (req, res) => {
       senderId,
       receiverId,
       message,
+      isCode,
+      language
     });
 
     if (newMessage) {
@@ -30,7 +33,7 @@ const sendMessage = async (req, res) => {
     await Promise.all([conversation.save(), newMessage.save()]);
 
     const populatedUser = await UserModel.findById(senderId);
-    // socket io functionality
+
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
       const notification = {
@@ -41,6 +44,7 @@ const sendMessage = async (req, res) => {
       io.to(receiverSocketId).emit("sendMsg", newMessage);
       io.to(receiverSocketId).emit("sendNotiMsg", notification);
     }
+
     return res
       .status(200)
       .json({ message: "Message sent successfully", newMessage });
@@ -287,9 +291,9 @@ const DeleteConversation = async (req, res) => {
     });
     return res
       .status(200)
-      .json({ message: "Conversation Deleted Successfully"});
+      .json({ message: "Conversation Deleted Successfully" });
   } catch (error) {
-    return res.status(500).json({ message: "SERVER ERROR : " + error});
+    return res.status(500).json({ message: "SERVER ERROR : " + error });
   }
 };
 
