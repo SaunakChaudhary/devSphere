@@ -1,6 +1,8 @@
 const { default: mongoose } = require("mongoose");
 const Community = require("../models/community.model");
-const { io } = require("../Socket/socket");
+const CommunityPostModel = require("../models/communityPost.model");
+const UserModel = require("../models/user.model");
+const { io, getReceiverSocketIds } = require("../Socket/socket");
 
 const createCommunity = async (req, res) => {
   try {
@@ -121,7 +123,101 @@ const joinCommunity = async (req, res) => {
   }
 };
 
+const sendMessageToAll = async (req, res) => {
+  try {
+    const { content, communityId, senderId, isCode, language } = req.body;
+
+    // Validate required fields
+    if (!content || !communityId || !senderId) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Find the community
+    const community = await Community.findById(communityId);
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    // Create the community post
+    const communityPost = await CommunityPostModel.create({
+      communityId,
+      createdBy: senderId,
+      isCode: Boolean(isCode),
+      language: language || null,
+      content,
+    });
+
+    // Add post to the community's posts array
+    community.posts.push(communityPost._id);
+
+    // Fetch the sender's user details
+    const populatedUser = await UserModel.findById(senderId);
+    if (!populatedUser) {
+      return res.status(404).json({ message: "Sender not found" });
+    }
+
+    // Notify community members via Socket.IO
+    const receiverSocketIds = getReceiverSocketIds(
+      community.members.filter(
+        (member) =>
+          member._id.toString() !== community.members[0]._id.toString() &&
+          member._id.toString() !== senderId
+      )
+    );
+
+    receiverSocketIds.forEach((receiverSocketId) => {
+      if (receiverSocketId) {
+        const notification = {
+          message: content,
+          user: populatedUser,
+        };
+
+        io.to(receiverSocketId).emit("sendCommMsg", {
+          communityId,
+          createdAt: communityPost.createdAt,
+          content,
+          isCode,
+          isRead:communityPost.isRead,
+          language,
+          _id: communityPost._id,
+          sender: populatedUser,
+        });
+        
+        io.to(receiverSocketId).emit("sendCommNotiMsg", notification);
+      }
+    });
+
+    // Save community changes
+    await community.save();
+
+    // Respond with success
+    return res
+      .status(201)
+      .json({ message: "Post created successfully", post: communityPost });
+  } catch (error) {
+    console.error("Error in sendMessageToAll:", error);
+    return res.status(500).json({ message: "SERVER ERROR: " + error.message });
+  }
+};
+
+const getMessagesOfCommunity = async (req, res) => {
+  try {
+    const { communityId } = req.params;
+
+    const community = await Community.findById(communityId).populate("posts");
+    if (!community) return res.status(200).json({ messages: [] });
+
+    return res.status(200).json({
+      messages: community.posts,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "SERVER ERROR : " + error });
+  }
+};
+
 module.exports = {
+  getMessagesOfCommunity,
+  sendMessageToAll,
   createCommunity,
   dispCommunity,
   searchedCommunity,

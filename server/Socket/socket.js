@@ -31,6 +31,12 @@ const getReceiverSocketId = (receiverId) => {
   return userSocketMap[receiverId];
 };
 
+const getReceiverSocketIds = (receiverIds) => {
+  return receiverIds
+    .map((receiverId) => userSocketMap[receiverId._id] || []) // Get socket IDs for each user
+    .flat(); // Flatten the array of arrays
+};
+
 // Helper function to get online users
 const getOnlineUsers = () => Object.keys(userSocketMap);
 
@@ -43,6 +49,7 @@ io.on("connection", (socket) => {
     if (!userSocketMap[userId]) {
       userSocketMap[userId] = [];
     }
+    
     userSocketMap[userId].push(socket.id);
     io.emit("getOnlineUsers", getOnlineUsers());
   }
@@ -73,4 +80,4 @@ io.on("connection", (socket) => {
   });
 });
 
-module.exports = { app, server, io,getReceiverSocketId };
+module.exports = { app, server, io,getReceiverSocketId,getReceiverSocketIds };

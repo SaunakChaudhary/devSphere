@@ -64,9 +64,11 @@ const getMessage = async (req, res) => {
         participants: { $all: [senderId, receiverId] },
       })
       .populate("messages");
+
     if (!conversation) {
       return res.status(200).json({ messages: [] });
     }
+    
     await messageModel.updateMany(
       {
         $and: [

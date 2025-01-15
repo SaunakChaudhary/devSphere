@@ -122,7 +122,7 @@ const CommChat = () => {
                   </div>
                   <div className="absolute text-xs top-[234px] text-gray-600 left-[154px]">
                     <span className="font-bold">Members: </span>
-                    {membersCount -1}
+                    {membersCount - 1}
                   </div>
                 </div>
 
@@ -133,18 +133,22 @@ const CommChat = () => {
                   <div className="w-5/6 mx-auto mt-2 mb-5">
                     <button
                       onClick={handleJoin}
-                      className={`${
-                        isJoined ? "border-2 border-blue-500" : "bg-blue-500 text-white"
-                      } w-full font-bold rounded-lg p-1.5`}
+                      className={`${isJoined ? "border-2 border-blue-500" : "bg-blue-500 text-white"
+                        } w-full font-bold rounded-lg p-1.5`}
                     >
                       {isJoined ? "Joined" : "Join"}
                     </button>
-                    <button
-                      onClick={() => navigate(`/user/commChatPost/${commDetails._id}`)}
-                      className="bg-yellow-300 w-full font-bold rounded-lg p-1.5 border-2 border-yellow-500 mt-5"
-                    >
-                      View Community
-                    </button>
+                    {
+
+                      isJoined &&
+                      <button
+                        onClick={() => navigate(`/user/commChatPost/${commDetails._id}`)}
+                        className="bg-yellow-300 w-full font-bold rounded-lg p-1.5 border-2 border-yellow-500 mt-5"
+                      >
+                        View Community
+                      </button>
+                    }
+
                   </div>
                 </div>
               </div>

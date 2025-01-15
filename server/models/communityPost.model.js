@@ -12,8 +12,10 @@ const communityPostSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    isCode: { type: Boolean, default: false },
+    isRead: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    language: { type: String },
     content: { type: String },
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );

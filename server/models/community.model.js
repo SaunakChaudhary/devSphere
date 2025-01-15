@@ -22,7 +22,7 @@ const communitySchema = new mongoose.Schema(
         },
       },
     ],
-    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "CommunityPost" }],
   },
   { timestamps: true }
 );

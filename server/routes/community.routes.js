@@ -25,16 +25,15 @@ router
   .route("/create")
   .post(conditionalUpload, communityController.createCommunity);
 
-  router
-  .route("/displayAllCommunity")
-  .get(communityController.dispCommunity);
+router.route("/displayAllCommunity").get(communityController.dispCommunity);
 
-  router
+router
   .route("/searchedCommunity/:id")
   .get(communityController.searchedCommunity);
-  
-router
-  .route("/joinCommunity")
-  .post(communityController.joinCommunity);
+
+router.route("/joinCommunity").post(communityController.joinCommunity);
+
+router.route("/sendMessageToAll").post(communityController.sendMessageToAll);
+router.route("/getMessagesOfCommunity/:communityId").get(communityController.getMessagesOfCommunity);
 
 module.exports = router;

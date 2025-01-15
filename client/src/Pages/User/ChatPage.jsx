@@ -34,7 +34,7 @@ const UserChatPage = () => {
   const { socket, onlineUsers } = useContext(SocketContext);
   const [loading, setLoading] = useState(false);
   const [userDetails, setuserDetails] = useState([]);
-  const [isCodeSnippetMode, setIsCodeSnippetMode] = useState(false); // Toggle between text and code snippet mode
+  const [isCodeSnippetMode, setIsCodeSnippetMode] = useState(false);
   const [codeSnippet, setCodeSnippet] = useState("");
 
   const getLastSeenMessage = (lastSeen) => {
@@ -286,7 +286,7 @@ const UserChatPage = () => {
                 className="flex mx-auto items-center active:text-red-500"
                 onClick={() => {
                   setLanguage(language.value);
-                    setIsOpen(false);
+                  setIsOpen(false);
                 }}
               >
                 <img src={language.icon} className="w-10 h-10 mr-2" alt={language.name} />

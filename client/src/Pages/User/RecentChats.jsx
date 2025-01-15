@@ -444,45 +444,44 @@ const RecentChats = () => {
               {searchResults.length === 0 && reChats.length === 0 ? (
                 <p>No results found.</p>
               ) : (
-                dispAllCommunities && (
-                  <section>
-                    {searchResults.length > 0 && (
-                      <div className="flex flex-col gap-4">
-                        {searchResults.map((chat) => (
-                          <article
-                            onClick={() =>
-                              navigate(`/user/userChat/${chat._id}`)
-                            }
-                            key={chat._id}
-                            className="bg-white border-2 rounded-lg  border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer flex items-center gap-4"
-                          >
-                            <img
-                              src={chat.avatar}
-                              alt={chat.name}
-                              className="w-12 h-12 md:w-16 md:h-16 border-2 border-black rounded-full"
-                            />
-                            <div>
-                              <h3 className="text-lg md:text-xl font-black mb-1">
-                                {chat.name}
-                              </h3>
-                              <p className="text-gray-600 text-sm mb-1 line-clamp-1">
-                                {chat.lastMessage.message}
-                              </p>
-                              <span className="text-gray-500 text-xs">
-                                {chat.lastMessage.message
-                                  ? getLastSeenMessage(
-                                      chat.lastMessage.updatedAt
-                                    )
-                                  : ""}
-                              </span>
-                            </div>
-                          </article>
-                        ))}
-                      </div>
-                    )}
-                  </section>
-                )
-              )}
+                <section>
+                  {searchResults.length > 0 && (
+                    <div className="flex flex-col gap-4">
+                      {searchResults.map((chat) => (
+                        <article
+                          onClick={() =>
+                            navigate(`/user/userChat/${chat._id}`)
+                          }
+                          key={chat._id}
+                          className="bg-white border-2 rounded-lg  border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] p-4 hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer flex items-center gap-4"
+                        >
+                          <img
+                            src={chat.avatar}
+                            alt={chat.name}
+                            className="w-12 h-12 md:w-16 md:h-16 border-2 border-black rounded-full"
+                          />
+                          <div>
+                            <h3 className="text-lg md:text-xl font-black mb-1">
+                              {chat.name}
+                            </h3>
+                            <p className="text-gray-600 text-sm mb-1 line-clamp-1">
+                              {chat.lastMessage.message}
+                            </p>
+                            <span className="text-gray-500 text-xs">
+                              {chat.lastMessage.message
+                                ? getLastSeenMessage(
+                                  chat.lastMessage.updatedAt
+                                )
+                                : ""}
+                            </span>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              )
+              }
             </section>
           )}
         </main>
